@@ -25,3 +25,4 @@ hs_err_pid*
 # MuleSoft
 .metadata/
 .mule/
+.tooling-apps-cache/
