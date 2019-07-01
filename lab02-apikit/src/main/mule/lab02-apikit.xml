@@ -124,27 +124,7 @@ output application/json
         </error-handler>
     </flow>
     <flow name="get:\accounts:diy-1-accounts-config">
-        <db:select doc:name="SELECT" doc:id="59eba977-ab0e-4ae4-848c-70ae4d2a4104" config-ref="Database_Config">
-            <db:sql>SELECT * from flights_customers WHERE accountType=:accountType</db:sql>
-            <db:input-parameters><![CDATA[#[{"accountType": attributes.queryParams["type"] }]]]></db:input-parameters>
-        </db:select>
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="6cbe3678-f653-4c4d-a8e1-d8a1262872e3">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-payload map ( payload01 , indexOfPayload01 ) -> {
-	firstName: (payload01.name! splitBy " ")[0],
-	lastName: (payload01.name! splitBy " ")[1],
-	country: payload01.country default "",
-	id: payload01.accountID,
-	postal: payload01.postal default "",
-	creationDate: payload01.creationDate as String,
-	"type": payload01.accountType default "",
-	miles: payload01.miles default 0
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<flow-ref doc:name="Flow Reference" doc:id="5b264ede-fd79-40c0-aa41-c1a153064fc3" name="getAccounts" />
     </flow>
     <flow name="post:\accounts:application\json:diy-1-accounts-config">
         <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="a3441c0f-ced9-4bbc-a18a-95ebb6c889a3">
@@ -210,26 +190,6 @@ output application/json
         </ee:transform>
     </flow>
     <flow name="get:\accounts\(id):diy-1-accounts-config">
-        <db:select doc:name="SELECT &lt;id&gt;" doc:id="37ff0fb8-32d8-48c7-971f-b6cd00ace276" config-ref="Database_Config">
-			<db:sql >SELECT * from flights_customers WHERE accountID=:id</db:sql>
-			<db:input-parameters ><![CDATA[#[{"id": attributes.uriParams.id default "" }]]]></db:input-parameters>
-		</db:select>
-		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="4c9f5ead-b150-4352-9fdc-ce3487f41f55">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-payload map ( payload01 , indexOfPayload01 ) -> {
-	firstName: (payload01.name! splitBy " ")[0],
-	lastName: (payload01.name! splitBy " ")[1],
-	country: payload01.country default "",
-	id: payload01.accountID,
-	postal: payload01.postal default "",
-	creationDate: payload01.creationDate as String,
-	"type": payload01.accountType default "",
-	miles: payload01.miles default 0
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<flow-ref doc:name="Flow Reference" doc:id="86826081-6650-4c71-9dbe-bf2ab90f4d2a" name="getAccountById" />
     </flow>
 </mule>
