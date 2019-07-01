@@ -9,6 +9,14 @@ traits:
   requester:
     headers:
       Requester-ID: string
+  check_not_found:
+    responses:
+      400:
+        body:
+          application/json:
+            example: {
+              "message": "Not found"
+            }
 
 /accounts:
   description: Usuarios cadastrados no sistema centralizado
@@ -34,6 +42,45 @@ traits:
             example: {
               "message": "No results"
             }
+  /{id}:
+    get:
+      description: Retrieve the item
+      is: [check_not_found]
+      responses:
+        200:
+          body:
+            application/json:
+              type: Account          
+    put:
+      description: Replace the item
+      is: [check_not_found]
+      responses:
+        200:
+          body:
+            application/json:
+              example: {
+                "message": "Replaced the item"
+              }                
+    patch:
+      description: Update the item
+      is: [check_not_found]
+      responses:
+        200:
+          body:
+            application/json:
+              example: {
+                "message": "Updated the item"
+              }              
+    delete:
+      description: Delete the item
+      is: [check_not_found]
+      responses:
+        200:
+          body:
+            application/json:
+              example: {
+                "message": "Deleted the item"
+              }
             
   post:
     description: Inclui uma lista de pessoas
