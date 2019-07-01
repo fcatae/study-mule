@@ -13,14 +13,27 @@ API Designer is part of the application, and it has the source code available:
     http://mulesoft.github.io/api-designer/
 
 
-Designing the API
-==================
+# Designing the API #
 
 RAML is a language to define API's. The documentation is very comprehensive and very complete:
 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md
 
 
-TODO:
+# External Articles #
+
+Overview
+https://www.baeldung.com/raml-restful-api-modeling-language-tutorial
+
+Traits
+https://www.baeldung.com/simple-raml-with-resource-types-and-traits
+
+Extension, Overlays
+https://www.baeldung.com/simple-raml-with-resource-types-and-traits
+
+
+# TODO #
+
+Tasks
 - Evaluate API Workbench (http://apiworkbench.com/)
 - Use API Sync in the Anypoint Studio
 - Test the command line API Sync Tool (https://github.com/mulesoft/api-sync-tool)
