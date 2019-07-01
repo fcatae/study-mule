@@ -1,0 +1,55 @@
+#%RAML 1.0
+version: v1
+title: DIY 1 Accounts API
+
+types:
+  Account: !include accounts.raml
+
+traits:
+  requester:
+    headers:
+      Requester-ID: string
+
+/accounts:
+  description: Usuarios cadastrados no sistema centralizado
+  is: [requester]  
+  get:
+    description: Retorna a lista de pessoas registradas no sistema
+    queryParameters:
+      type:
+        required: true
+        enum: [personal, business]        
+      name?: string
+      country?: string
+    responses:
+      200:
+        body:          
+          application/json:
+            type: Account[]
+            example: !include accountExample.raml
+      400:
+        description: Not found
+        body:
+          application/json:
+            example: {
+              "message": "No results"
+            }
+            
+  post:
+    description: Inclui uma lista de pessoas
+    body:
+      application/json:
+        type: Account[]
+    responses:
+      201:
+        body:
+          application/json:
+            properties:
+              message: string
+            example:
+              message: "Account created (but not really)"
+      400:
+        body:
+          application/json:
+            example:
+              message: "No rows to insert"
