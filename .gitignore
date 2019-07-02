@@ -26,3 +26,4 @@ hs_err_pid*
 .metadata/
 .mule/
 .tooling-apps-cache/
+.tooling/
