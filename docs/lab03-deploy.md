@@ -47,3 +47,15 @@ Application (workers) must listen to 0.0.0.0 at ports 8081 (http.port) or 8082 (
     Networking Guide
     https://docs.mulesoft.com/runtime-manager/cloudhub-networking-guide
 
+# API Manager #
+
+Create an API with a Proxy.
+
+Proxy is an API Gateway
+- The backend implementation does NOT need to be a Mule application
+- Is deployed as a Mule application in CloudHub
+- Allows creating policies (eg: Rate limiting)
+- Separates the Implementation API and Consumer API
+
+
+
