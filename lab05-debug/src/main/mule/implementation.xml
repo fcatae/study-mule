@@ -10,15 +10,24 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 	<!-- Import the flows located at templates.xml from the templates dependency -->
 	
 	<db:config name="Database_Config" doc:name="Database Config" doc:id="8c74c33a-bec1-4e86-9cd4-842ab0aaeff5" >
-		<db:derby-connection database="http://localhost:3306/testDB" />
+		<db:my-sql-connection host="mudb.learn.mulesoft.com" port="3306" user="mule" password="mule" database="training"/>
 	</db:config>
 	<configuration-properties doc:name="Configuration properties" doc:id="08244fd7-323a-4dff-88ea-6c6477280d2c" file="${env}-properties.yaml" />
 	<import doc:name="Import" doc:id="0ae7b0f4-53d9-40c5-9afb-9c54798dddb8" file="templates.xml" />
 	<flow name="getAllAccountsFlow" doc:id="621692f7-b889-4949-b003-cc90b2cd1c73" >
 		<db:select doc:name="Database" doc:id="ed49e285-71ee-45e6-a218-1d933f4b5590" config-ref="Database_Config">
-			<db:sql >SELECT * FROM ${db.tableName} WHERE accountType = :type</db:sql>
+			<db:sql >SELECT * FROM flights_customers WHERE accountType = :type</db:sql>
 			<db:input-parameters ><![CDATA[#[{"type": attributes.queryParams['type']}]]]></db:input-parameters>
 		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="f085b1cb-4178-4ad5-8358-f13ddbafeb65" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
 		<flow-ref doc:name="validate DB array" name="validateArray"/>
 		<ee:transform doc:name="Transform Message" doc:id="22da0851-b4f8-440c-9990-b8de1f7d9180" >
 			<ee:message >
@@ -49,7 +58,7 @@ payload map ( (payload01 , indexOfPayload01) -> {
 output application/json
 ---
 (payload map ( (payload01 , indexOfPayload01) -> {
-	salesID: payload01.accountID ++ payload01.name ++ payload01.postal + payload01.creationDate
+	salesID: (payload01.accountID as String) ++ payload01.name ++ payload01.postal + (payload01.creationDate as String),
 	id: payload01.accountID,
 	firstName: (payload01.name splitBy ' ')[0],
 	lastName: (payload01.name splitBy ' ')[1],
