@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Test_Listener" doc:name="HTTP Listener config" doc:id="fdd8b735-00eb-4e0f-ab06-e56a8c4f7b19">
+		<http:listener-connection host="0.0.0.0" port="9090" />
+	</http:listener-config>
+	<http:request-config name="Localhost_Request_configuration" doc:name="HTTP Request configuration" doc:id="fe5e8549-d6c2-4709-b6a2-30fc798287a4" >
+		<http:request-connection host="127.0.0.1" port="8081" />
+	</http:request-config>
+	<flow name="HTTP_Test_Flow" doc:id="a43e8974-c3f7-426c-b11e-5c0ad299b8b8" >
+		<http:listener doc:name="GET /test" doc:id="60c550fc-23d7-465a-b3eb-063ac8018a2e" config-ref="HTTP_Test_Listener" path="/test"/>
+		<http:request method="GET" doc:name="GET /api/accounts?type=personal" doc:id="729505ca-45c7-4267-8bf5-9424381eb12b" config-ref="Localhost_Request_configuration" path="/api/accounts?type=personal">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"Requester-ID" : "Value123"
+}]]]></http:headers>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="e55962e1-4698-4081-9c0b-6665430e7e38" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: (payload[0].firstName! as String) ++ (payload[0].lastName! as String)
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
