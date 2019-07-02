@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd  http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
-http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+<mule xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd  http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd">
     <http:listener-config name="diy-1-accounts-httpListenerConfig">
         <http:listener-connection host="0.0.0.0" port="8081" />
     </http:listener-config>
@@ -11,6 +12,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
     <http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="39f2ef37-1955-4d84-ac1a-af05d0c27b95" >
 		<http:listener-connection host="0.0.0.0" port="9091" />
 	</http:listener-config>
+	<api-gateway:autodiscovery apiId="15745832" doc:name="API Autodiscovery" doc:id="0186be4e-8ea4-4b77-9407-d93c539c4e02" flowRef="diy-1-accounts-main" />
 	<flow name="diy-1-accounts-main">
         <http:listener config-ref="diy-1-accounts-httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]" />
@@ -197,14 +199,14 @@ output application/json
 		<flow-ref doc:name="Flow Reference" doc:id="86826081-6650-4c71-9dbe-bf2ab90f4d2a" name="getAccountById" />
     </flow>
 	<flow name="Ping_Flow" doc:id="58228a5e-d332-41f8-bd69-98eee2368b39" >
-		<http:listener doc:name="GET /ping" doc:id="208eee43-a1ba-4236-b1e3-5eb9f57d2533" config-ref="HTTP_Listener_config" path="/ping"/>
+		<http:listener doc:name="GET /ping" doc:id="208eee43-a1ba-4236-b1e3-5eb9f57d2533" config-ref="diy-1-accounts-httpListenerConfig" path="/ping"/>
 		<ee:transform doc:name="Transform Message" doc:id="dca6e7a5-f844-4c49-9ed2-0aa85d33856a" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
 {
-	"ping": "pong"
+	"ping": "pong2"
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
