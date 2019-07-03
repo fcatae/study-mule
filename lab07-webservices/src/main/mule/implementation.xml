@@ -20,15 +20,26 @@ http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/
 	<flow name="Get_Account_Transactions" doc:id="4f58bd2e-aeaa-4ce8-a4c0-07df3a218bc4" >
 		<http:listener doc:name="GET /accounts_transactions" doc:id="218fac09-f9d8-4ed7-9bee-c6fff45779a1" config-ref="HTTP_Listener_config" path="/accounts_transactions"/>
 		<flow-ref doc:name="Get Accounts" doc:id="7ab670f0-db2d-4e74-a223-61805452d75b" name="Get_Accounts"/>
+		<set-variable value="#[payload]" doc:name="Store Accounts" doc:id="9182893b-0860-4373-a569-a2bf5fe79538" variableName="accounts"/>
 		<flow-ref doc:name="Get Transactions" doc:id="6d8ad571-4586-406b-b246-333527484b04" name="Get_Transactions"/>
-		<ee:transform doc:name="Count Transactions" doc:id="ca292675-66f9-4e3e-bc53-cc1005d9e413" >
+		<set-variable value="#[payload]" doc:name="Store Transactions" doc:id="17cd0375-973f-442c-bd5f-5b1f79ff4255" variableName="transactions"/>
+		<ee:transform doc:name="Data Structure" doc:id="fce39af5-8194-4e8c-a336-cdcf18f583d4" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
+output application/java
 ---
 {
-	"processed_messages": sizeOf( (payload.*transactionID) default [] )
+	accounts: vars.accounts,
+	transactions: vars.transactions
 }]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="ebe544fc-c610-44d4-89f6-93fd42cfb0ca"/>
+		<ee:transform doc:name="Transform Message" doc:id="61632948-6c7d-4de8-9e40-8c78e83ed4d0" >
+			<ee:message >
+				<ee:set-payload resource="dwTransform.dwl" />
 			</ee:message>
 		</ee:transform>
 	</flow>
@@ -69,7 +80,6 @@ output application/json
 payload]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<logger level="INFO" doc:name="Logger" doc:id="3cdb7816-f72a-41ec-bc81-3ef0b2a11711" />
 	</flow>
 	<flow name="Get_Transactions" doc:id="294b3ba9-3b5e-4f14-a277-9db1f103b6da" >
 		<http:listener doc:name="GET /transactions" doc:id="f30bfbf6-9963-429b-a882-f9871600c25f" config-ref="HTTP_Listener_config" path="/transactions"/>
@@ -87,7 +97,6 @@ ns ns0 http://training.mulesoft.com/
 			</ee:message>
 		</ee:transform>
 		<wsc:consume doc:name="SOAP Request" doc:id="8ddc6a6a-8d59-41f4-85ed-91372afebb21" config-ref="Web_Service_Consumer_Config" operation="GetTransactionsforCustomers"/>
-		<logger level="INFO" doc:name="Logger" doc:id="712ef987-4d86-41b1-9c91-e6c84c104427" />
 		<ee:transform doc:name="Transform Message" doc:id="188e96a9-b76c-41d3-a6db-baf6e42a4e71" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0

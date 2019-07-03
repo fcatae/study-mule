@@ -1,0 +1,16 @@
+[
+    {
+        "amount": "3823.0",
+        "customerRef": "4999",
+        "flightID": "UNITEDER3KFD2015-08-11",
+        "region": "EU",
+        "transactionID": "181948742"
+      },
+      {
+        "amount": "2856.0",
+        "customerRef": "5000",
+        "flightID": "DELTAA134DS2015-04-11",
+        "region": "EU",
+        "transactionID": "181948767"
+      }
+]

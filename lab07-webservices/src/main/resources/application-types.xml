@@ -18,4 +18,5 @@ type json_input = Array<{|  salesID: String,   id: String,   firstName: String, 
       </types:input-event>
     </types:processor-declaration>
   </types:enrichment>
+  <types:enrichment select="#fce39af5-8194-4e8c-a336-cdcf18f583d4"/>
 </types:mule>
