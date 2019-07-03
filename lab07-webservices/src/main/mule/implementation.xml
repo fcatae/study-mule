@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:diy1accounts-api="http://www.mulesoft.org/schema/mule/diy1accounts-api"
-	xmlns:http="http://www.mulesoft.org/schema/mule/http"
-	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:diy1accounts-api="http://www.mulesoft.org/schema/mule/diy1accounts-api"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/diy1accounts-api http://www.mulesoft.org/schema/mule/diy1accounts-api/current/mule-diy1accounts-api.xsd
-http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd">
 	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="c983ddb5-7095-4fc7-b52c-1735a26ec312" >
 		<http:listener-connection host="0.0.0.0" port="8081" />
 	</http:listener-config>
@@ -13,6 +14,24 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="c0eb1918-0018-49c8-acf5-1bd8969f42bd" basePath="/api" >
 		<http:request-connection host="apdev-accounts-ws.cloudhub.io" port="80" />
 	</http:request-config>
+	<wsc:config name="Web_Service_Consumer_Config" doc:name="Web Service Consumer Config" doc:id="43e098d0-428b-4c26-8b98-6f144d0646b1" >
+		<wsc:connection wsdlLocation="http://apdev-accounts-ws.cloudhub.io/api/transactions?wsdl" service="TransactionServiceService" port="TransactionServicePort" address="http://apdev-accounts-ws.cloudhub.io/api/transactions" />
+	</wsc:config>
+	<flow name="Get_Account_Transactions" doc:id="4f58bd2e-aeaa-4ce8-a4c0-07df3a218bc4" >
+		<http:listener doc:name="GET /accounts_transactions" doc:id="218fac09-f9d8-4ed7-9bee-c6fff45779a1" config-ref="HTTP_Listener_config" path="/accounts_transactions"/>
+		<flow-ref doc:name="Get Accounts" doc:id="7ab670f0-db2d-4e74-a223-61805452d75b" name="Get_Accounts"/>
+		<flow-ref doc:name="Get Transactions" doc:id="6d8ad571-4586-406b-b246-333527484b04" name="Get_Transactions"/>
+		<ee:transform doc:name="Count Transactions" doc:id="ca292675-66f9-4e3e-bc53-cc1005d9e413" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"processed_messages": sizeOf( (payload.*transactionID) default [] )
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
 	<flow name="Get_Accounts" doc:id="2d8fc926-660d-4d02-bcda-1c4f321f035e" >
 		<http:listener doc:name="GET /accounts" doc:id="91ed7994-1fa5-476f-ab85-f7393dc942b0" config-ref="HTTP_Listener_config" path="/accounts"/>
 		<set-variable value='#[attributes.queryParams["type"] default "business"]' doc:name="SetAccountType" doc:id="fb9454ac-1388-42df-b097-32d91e18d02c" variableName="accountType"/>
@@ -51,5 +70,31 @@ payload]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="3cdb7816-f72a-41ec-bc81-3ef0b2a11711" />
+	</flow>
+	<flow name="Get_Transactions" doc:id="294b3ba9-3b5e-4f14-a277-9db1f103b6da" >
+		<http:listener doc:name="GET /transactions" doc:id="f30bfbf6-9963-429b-a882-f9871600c25f" config-ref="HTTP_Listener_config" path="/transactions"/>
+		<ee:transform doc:name="Transform Message" doc:id="fa614ebc-dcdd-42d9-ac98-7ad7804b8c05" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://training.mulesoft.com/
+---
+{
+	ns0#GetTransactionsforCustomers: {
+		customerID: payload.id default []
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<wsc:consume doc:name="SOAP Request" doc:id="8ddc6a6a-8d59-41f4-85ed-91372afebb21" config-ref="Web_Service_Consumer_Config" operation="GetTransactionsforCustomers"/>
+		<logger level="INFO" doc:name="Logger" doc:id="712ef987-4d86-41b1-9c91-e6c84c104427" />
+		<ee:transform doc:name="Transform Message" doc:id="188e96a9-b76c-41d3-a6db-baf6e42a4e71" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload..*transaction]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
 	</flow>
 </mule>

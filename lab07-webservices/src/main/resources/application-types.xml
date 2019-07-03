@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="json_input" format="json">
+      <types:shape format="weave" example="examples/account-array.json"><![CDATA[%dw 2.0
+
+type json_input = Array<{|  salesID: String,   id: String,   firstName: String,   lastName: String,   address: String,   postal: String,   country: String,   creationDate: String,   accountType: String,   miles: Number {"typeId": "int"}|}> {"example": "[{\"salesID\":\"4400Mat Siva824332017-10-21T22:54:36+0.00\",\"id\":\"4400\",\"firstName\":\"Mat\",\"lastName\":\"Siva\",\"address\":\"12345 Green, Boulder, Colorado\",\"postal\":\"82433\",\"country\":\"USA\",\"creationDate\":\"2017-10-21T22:54:36+0.00\",\"accountType\":\"business\",\"miles\":119093},{\"salesID\":\"4411Arjun Dale725322006-03-04T19:53:05+0.00\",\"id\":\"4411\",\"firstName\":\"Arjun\",\"lastName\":\"Dale\",\"address\":\"Capthorne Avenue, London, Harrow\",\"postal\":\"72532\",\"country\":\"United Kingdom\",\"creationDate\":\"2006-03-04T19:53:05+0.00\",\"accountType\":\"business\",\"miles\":126689},{\"salesID\":\"4412James Conway191502014-03-23T08:29:28+0.00\",\"id\":\"4412\",\"firstName\":\"James\",\"lastName\":\"Conway\",\"address\":\"83 Elden Station, Herndon, VA\",\"postal\":\"19150\",\"country\":\"USA\",\"creationDate\":\"2014-03-23T08:29:28+0.00\",\"accountType\":\"business\",\"miles\":89220},{\"salesID\":\"4415Harrow Nope711742008-06-24T11:39:49+0.00\",\"id\":\"4415\",\"firstName\":\"Harrow\",\"lastName\":\"Nope\",\"address\":\"355 E Capthorne Court, Arkhab, Alexandra\",\"postal\":\"71174\",\"country\":\"United Kingdom\",\"creationDate\":\"2008-06-24T11:39:49+0.00\",\"accountType\":\"business\",\"miles\":91326},{\"salesID\":\"4416Spawn Cycles454742013-07-15T09:56:05+0.00\",\"id\":\"4416\",\"firstName\":\"Spawn\",\"lastName\":\"Cycles\",\"address\":\"4130 Chromoly, Squamish, BC\",\"postal\":\"45474\",\"country\":\"Canada\",\"creationDate\":\"2013-07-15T09:56:05+0.00\",\"accountType\":\"business\",\"miles\":28123},{\"salesID\":\"4419David Jame856132006-07-11T21:00:01+0.00\",\"id\":\"4419\",\"firstName\":\"David\",\"lastName\":\"Jame\",\"address\":\"5857 Yonge Street, Vancouver, BC\",\"postal\":\"85613\",\"country\":\"Canada\",\"creationDate\":\"2006-07-11T21:00:01+0.00\",\"accountType\":\"business\",\"miles\":34324},{\"salesID\":\"4420Yeti Bringer780142007-08-12T20:59:31+0.00\",\"id\":\"4420\",\"firstName\":\"Yeti\",\"lastName\":\"Bringer\",\"address\":\"1819 Bangy Boon, Bangalore, Karn Taka\",\"postal\":\"78014\",\"country\":\"India\",\"creationDate\":\"2007-08-12T20:59:31+0.00\",\"accountType\":\"business\",\"miles\":80665},{\"salesID\":\"4421Nick The Shoemaker615902010-10-16T02:55:09+0.00\",\"id\":\"4421\",\"firstName\":\"Nick\",\"lastName\":\"The Shoemaker\",\"address\":\"484 High Street, Peterborough, Cambs\",\"postal\":\"61590\",\"country\":\"United Kingdom\",\"creationDate\":\"2010-10-16T02:55:09+0.00\",\"accountType\":\"business\",\"miles\":107261},{\"salesID\":\"4423Abhi Vi872262006-06-22T07:55:52+0.00\",\"id\":\"4423\",\"firstName\":\"Abhi\",\"lastName\":\"Vi\",\"address\":\"494 Slough Street, Slough, Berkshire\",\"postal\":\"87226\",\"country\":\"United Kingdom\",\"creationDate\":\"2006-06-22T07:55:52+0.00\",\"accountType\":\"business\",\"miles\":87557},{\"salesID\":\"4424Dale Burgers398922014-11-19T20:15:23+0.00\",\"id\":\"4424\",\"firstName\":\"Dale\",\"lastName\":\"Burgers\",\"address\":\"12345 Test Rd, Gurnee, IL\",\"postal\":\"39892\",\"country\":\"USA\",\"creationDate\":\"2014-11-19T20:15:23+0.00\",\"accountType\":\"business\",\"miles\":116410},{\"salesID\":\"4425Hellow World Bowl412082003-03-24T09:23:22+0.00\",\"id\":\"4425\",\"firstName\":\"Hellow\",\"lastName\":\"World Bowl\",\"address\":\"1011 Arnold Heights Dr, Vancouver, BC\",\"postal\":\"41208\",\"country\":\"Canada\",\"creationDate\":\"2003-03-24T09:23:22+0.00\",\"accountType\":\"business\",\"miles\":28581}]"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#fa614ebc-dcdd-42d9-ac98-7ad7804b8c05">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="json_input"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

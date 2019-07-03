@@ -6,3 +6,9 @@ Requester-ID: anonyous
 
 ###
 GET http://localhost:8081/accounts
+
+###
+GET http://localhost:8081/transactions
+
+###
+GET http://localhost:8081/accounts_transactions?type=personal
