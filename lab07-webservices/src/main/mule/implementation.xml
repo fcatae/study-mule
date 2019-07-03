@@ -1,13 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
-	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
-http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:diy1accounts-api="http://www.mulesoft.org/schema/mule/diy1accounts-api"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/diy1accounts-api http://www.mulesoft.org/schema/mule/diy1accounts-api/current/mule-diy1accounts-api.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="c983ddb5-7095-4fc7-b52c-1735a26ec312" >
 		<http:listener-connection host="0.0.0.0" port="8081" />
 	</http:listener-config>
+	<diy1accounts-api:config name="REST_Accounts_Endpoint" doc:name="DIY 1 Accounts API Config" doc:id="4a4e8b17-0c16-4e3c-8117-f5b4c4b55031" property_host="apdev-accounts-ws.cloudhub.io" property_port="80" property_protocol="HTTP" property_basePath="/api/accounts" />
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="c0eb1918-0018-49c8-acf5-1bd8969f42bd" basePath="/api" >
+		<http:request-connection host="apdev-accounts-ws.cloudhub.io" port="80" />
+	</http:request-config>
 	<flow name="Get_Accounts" doc:id="2d8fc926-660d-4d02-bcda-1c4f321f035e" >
 		<http:listener doc:name="GET /accounts" doc:id="91ed7994-1fa5-476f-ab85-f7393dc942b0" config-ref="HTTP_Listener_config" path="/accounts"/>
+		<set-variable value='#[attributes.queryParams["type"] default "business"]' doc:name="SetAccountType" doc:id="fb9454ac-1388-42df-b097-32d91e18d02c" variableName="accountType"/>
+		<set-variable value='#[attributes.headers["Requester-ID"] default "anonymous"]' doc:name="SetRequesterID" doc:id="c9cd21f1-7fdd-4bc7-b0c4-886755cfab1f" variableName="requesterId"/>
+		<ee:transform doc:name="SetFilters" doc:id="df2147ca-3534-4241-b81a-1e99c38fde39" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	filters: {
+		name: attributes.queryParams.name,
+		country: attributes.queryParams.country
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<http:request method="GET" doc:name="Request" doc:id="3515c89a-4b4f-44bb-a875-f38324530cb4" config-ref="HTTP_Request_configuration" path="/accounts">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"Requester-ID" : vars.requesterId
+}]]]></http:headers>
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"type" : vars.accountType
+}]]]></http:query-params>
+		</http:request>
+		<ee:transform doc:name="JSON response" doc:id="83fa550b-303b-4647-9404-0a98bbce84b1" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="3cdb7816-f72a-41ec-bc81-3ef0b2a11711" />
 	</flow>
 </mule>

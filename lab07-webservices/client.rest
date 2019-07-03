@@ -1,0 +1,8 @@
+
+
+###
+GET http://apdev-accounts-ws.cloudhub.io/api/accounts?type=business
+Requester-ID: anonyous
+
+###
+GET http://localhost:8081/accounts
