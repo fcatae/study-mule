@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="7cf62ca9-5960-4c9c-9e42-30fd2f1e11eb" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="f4169d8f-0283-4f14-a9a5-7d3fe4d9af3d" >
+		<http:request-connection host="mu.learn.mulesoft.com" port="80" />
+	</http:request-config>
+	<flow name="initialize" doc:id="304b28bc-0558-4593-aebe-004ab8d04b8c" >
+		<http:listener doc:name="HTTP: GET /flights" doc:id="6d185fbd-aa8a-4c51-81b3-15b0f97f638a" config-ref="HTTP_Listener_config" path="/flights"/>
+		<set-variable value="#[attributes.queryParams.destination]" doc:name="destination" doc:id="69ed4dd8-a3af-48f8-ace3-9905083273c8" variableName="destination"/>
+		<flow-ref doc:name="mockData" doc:id="a0cc12b5-eb36-44ce-9e32-6d747ad2fddd" name="mockData"/>
+		<set-variable value="#[payload]" doc:name="payload-GET" doc:id="05ff4f5c-30fa-4d71-b422-af82262196d4" variableName="payload-GET"/>
+		<async doc:name="Async" doc:id="61d1e020-3b77-452c-962c-77414ebdc86c" >
+			<logger level="INFO" doc:name="Logger" doc:id="5568f90b-0046-4d21-a036-ada71b297b12" message='#["variable" ++ vars.destination as String]'/>
+			<set-variable value="GRU" doc:name="Set Variable" doc:id="184d1e16-10a8-4009-b7ad-aad80d015077" variableName="destination" />
+			<http:request method="POST" doc:name="Request" doc:id="b235bc23-a4a9-437b-9582-61d99cda0f36" url="http://localhost:8081/processData" />
+		</async>
+		<set-variable value="RIO" doc:name="Set Variable" doc:id="3cb4dd60-6572-4d12-9e8d-15babbd10f30" variableName="destination"/>
+		<logger level="INFO" doc:name="Copy_of_Logger" doc:id="ef306910-49d8-49d9-90ba-f58af6fcbd6d" message='#["variable2 " ++ vars.destination as String]' />
+		<set-payload value="#[output application/json ---
+{
+    &quot;payload-GET&quot;: vars.'payload-GET',
+	&quot;payload-PROCESS&quot;: payload,
+    &quot;destination-process&quot;: vars.destination,
+    &quot;requesterID-process&quot;: attributes.headers.'requester-id'
+}]" doc:name="final summary" doc:id="68c44115-a04b-420b-8fe9-aa83f6d5c305" />
+	</flow>
+	<flow name="mockData" doc:id="578be7bc-ce05-493e-9385-ef388dbcc6b8" >
+		<http:request method="GET" doc:name="Request" doc:id="7b1230b9-04d6-4d3a-9e3e-d47233b7cec1" config-ref="HTTP_Request_configuration" path="/american/{destination}">
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"destination" : vars.destination
+}]]]></http:uri-params>
+		</http:request>
+	</flow>
+	<flow name="mainFlow" doc:id="0f887d89-8304-4da9-938c-84ad9fa07904" >
+		<set-payload value='[
+        {
+            "planeType": "Boeing 737",
+            "code2": "1093",
+            "toAirport": "SFO",
+            "takeOffDate": "2015-02-11",
+            "fromAirport": "MUA",
+            "price": 142,
+            "airlineName": "American Airlines",
+            "seatsAvailable": "1",
+            "code1": "rree"
+        },
+        {
+            "planeType": "Boeing 777",
+            "code2": "1994",
+            "toAirport": "SFO",
+            "takeOffDate": "2015-01-01",
+            "fromAirport": "MUA",
+            "price": 676,
+            "airlineName": "American Airlines",
+            "seatsAvailable": "none",
+            "code1": "rree"
+        },
+        {
+            "planeType": "Boeing 737",
+            "code2": "2000",
+            "toAirport": "SFO",
+            "takeOffDate": "2015-02-20",
+            "fromAirport": "MUA",
+            "price": 300,
+            "airlineName": "American Airlines",
+            "seatsAvailable": "30",
+            "code1": "rree"
+        },
+        {
+            "planeType": "Boeing 737",
+            "code2": "3000",
+            "toAirport": "SFO",
+            "takeOffDate": "2015-02-01",
+            "fromAirport": "MUA",
+            "price": 900,
+            "airlineName": "American Airlines",
+            "seatsAvailable": "none",
+            "code1": "rree"
+        },
+        {
+            "planeType": "Boeing 737",
+            "code2": "4567",
+            "toAirport": "SFO",
+            "takeOffDate": "2015-01-20",
+            "fromAirport": "MUA",
+            "price": 456,
+            "airlineName": "American Airlines",
+            "seatsAvailable": "100",
+            "code1": "rree"
+        }
+    ]' doc:name="flights" doc:id="71c10e25-6deb-4850-9659-a1615d4e75ec" mimeType="application/json" />
+		<flow-ref doc:name="processData" doc:id="92b07b04-3b8e-4f25-b439-ae883b117192" name="processData" />
+	</flow>
+	<flow name="processData" doc:id="c7379ac2-5182-4bd2-8475-cd7c520f8319" >
+		<http:listener doc:name="Listener" doc:id="c4e0d858-f39d-4489-99f0-f2719c5bc298" config-ref="HTTP_Listener_config" path="/processData" allowedMethods="POST"/>
+		<ee:transform doc:name="summary payload" doc:id="2ea0ec2d-22c7-48d1-94aa-529b34372457" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	payload: payload as Array map ((object) ->
+		{
+			planeType: object.planeType,
+			flightDate: object.takeOffDate,
+			price: object.price
+		}
+	),
+    destination: vars.destination,
+    requesterID: attributes.headers.'requester-id'
+}
+]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="process data summary" doc:id="a14ca1a7-43ef-4479-b0d1-56d15a01c3a0" message="#[payload]"/>
+	</flow>
+</mule>
