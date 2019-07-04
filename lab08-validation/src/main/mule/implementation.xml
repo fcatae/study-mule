@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:xml-module="http://www.mulesoft.org/schema/mule/xml-module"
-	xmlns:json="http://www.mulesoft.org/schema/mule/json"
-	xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:xml-module="http://www.mulesoft.org/schema/mule/xml-module"
+	xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd
 http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
 http://www.mulesoft.org/schema/mule/xml-module http://www.mulesoft.org/schema/mule/xml-module/current/mule-xml-module.xsd
-http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
 
 	<xml-module:config name="XML_Config" doc:name="XML Config" doc:id="3e2c859a-a089-4bae-862c-0d909e2585b0" >
 		<xml-module:namespaces >
@@ -36,6 +37,9 @@ output application/json
 			</ee:message>
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="92f1abb6-5968-40e8-b875-fd350697410f" />
+		<validation:is-true doc:name="account &amp; flights NOT EMPTY" doc:id="091c1489-3e18-416d-8290-619d81366656" expression="#[ (payload.flights.listAllFlightsResponse != null) or (payload.accounts != []) ]" message="account &amp; flights EMPTY" />
+		<validation:is-true doc:name="flights NOT EMPTY" doc:id="2832f4d7-abb1-4547-8087-8c1af7b00797" expression="#[ payload.flights.listAllFlightsResponse != null  ]" message="flights EMPTY"/>
+		<validation:is-true doc:name="accounts NOT EMPTY" doc:id="8a1f674b-29de-4738-ab3c-2d4ed812b9ef" expression="#[ payload.accounts  != [] ]" />
 		<choice doc:name="Choice" doc:id="346c33d6-0172-48bc-8ae9-db257576a34c" >
 			<when expression="#[payload.accounts == [] and payload.flights.listAllFlightsResponse == null]">
 				<ee:transform doc:name="account &amp; flights EMPTY" doc:id="e4b02328-c34d-434a-bb3a-61b4dac5ffe0" >
@@ -110,7 +114,7 @@ ns ns0 http://soap.training.mulesoft.com/
 ---
 {
 	ns0#findFlight: {
-		destination: "LAX"
+		destination: "VALUE"
 	}
 }]]></ee:set-payload>
 			</ee:message>
