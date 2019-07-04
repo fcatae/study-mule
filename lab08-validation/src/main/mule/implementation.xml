@@ -1,27 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:xml-module="http://www.mulesoft.org/schema/mule/xml-module" xmlns:json="http://www.mulesoft.org/schema/mule/json"
-	xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc"
-	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:xml-module="http://www.mulesoft.org/schema/mule/xml-module"
+	xmlns:json="http://www.mulesoft.org/schema/mule/json"
+	xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd
 http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
-http://www.mulesoft.org/schema/mule/xml-module http://www.mulesoft.org/schema/mule/xml-module/current/mule-xml-module.xsd">
+http://www.mulesoft.org/schema/mule/xml-module http://www.mulesoft.org/schema/mule/xml-module/current/mule-xml-module.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 
+	<xml-module:config name="XML_Config" doc:name="XML Config" doc:id="3e2c859a-a089-4bae-862c-0d909e2585b0" >
+		<xml-module:namespaces >
+			<xml-module:namespace prefix="ns2" uri="http://soap.training.mulesoft.com/" />
+		</xml-module:namespaces>
+	</xml-module:config>
 	<flow name="accounts" doc:id="ac7a9c11-dc54-409a-b939-0f28af0e9e0d" >
 		<http:listener doc:name="HTTP: GET /accounts" doc:id="5237700e-e461-49ff-9925-a9eee436fbb7" config-ref="HTTP_Listener_config" path="/accounts"/>
 		<http:request method="GET" doc:name="HTTP: GET /accounts" doc:id="68e3c5e1-4984-4186-af2d-58e3d0ffed67" config-ref="HTTP_Request_Accounts_API" path="${accounts.endpoint}">
-			<http:headers ><![CDATA[#[output applicaton/java
+			<http:headers ><![CDATA[#[output application/java
 ---
-{
+{ 
 	"Requester-ID" : "RJ45"
 }]]]></http:headers>
-			<http:query-params ><![CDATA[#[output applicaton/java
+			<http:query-params ><![CDATA[#[output application/java
 ---
 {
 	"type" : "personal"
 }]]]></http:query-params>
 		</http:request>
+		<json:validate-schema doc:name="Validate schema" doc:id="d9ddf101-ee1d-4d1d-b673-7763b4545eb4" schema="schemas/accountsSchema.json"/>
 	</flow>
 	<flow name="flights" doc:id="dd9ee723-226c-4a97-ae7f-ddc8448f71ce" >
 		<http:listener doc:name="HTTP: GET /flights" doc:id="f9103d96-c52a-44fb-9155-87e29a484bbc" config-ref="HTTP_Listener_config" path="/flights">
@@ -31,5 +38,9 @@ http://www.mulesoft.org/schema/mule/xml-module http://www.mulesoft.org/schema/mu
 		</http:listener>
 		<wsc:consume doc:name="WSC: Get all flights" doc:id="f0118259-8070-4421-8da8-9ae17de4d90e" config-ref="Web_Service_Consumer_Config" operation="listAllFlights">
 		</wsc:consume>
+		<logger level="INFO" doc:name="Logger" doc:id="514e1a3d-1305-4a4d-973f-a16856e16872" />
+		<xml-module:validate-schema doc:name="Validate schema" doc:id="fa368158-c0e5-429c-ae62-e58aea432a29" schemas="schemas/flightsSchema.xsd" config-ref="XML_Config" >
+			<xml-module:content ><![CDATA[#[payload.body]]]></xml-module:content>
+		</xml-module:validate-schema>
 	</flow>
 </mule>
