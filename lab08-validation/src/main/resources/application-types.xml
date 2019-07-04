@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="xml_output" format="xml">
+      <types:shape format="xml-schema" element="{http://soap.training.mulesoft.com/}listAllFlightsResponse" location="schemas/flightsSchema.xsd"/>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#bd9c1f8e-6acb-4919-aa79-be0ba5d87dd5">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="xml_output"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

@@ -14,33 +14,91 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 			<xml-module:namespace prefix="ns2" uri="http://soap.training.mulesoft.com/" />
 		</xml-module:namespaces>
 	</xml-module:config>
+	<flow name="implementationFlow" doc:id="58702002-cbc7-4440-939d-1e1bfbae31ed" >
+		<http:listener doc:name="GET /process" doc:id="bc111f51-9d0d-40f0-a1b8-12258309a2ec" config-ref="HTTP_Listener_config" path="/process"/>
+		<scatter-gather doc:name="Scatter-Gather" doc:id="2774f46d-9609-4803-b363-2e29900cca58" >
+			<route >
+				<flow-ref doc:name="Accounts" doc:id="5c502ffb-1fe9-4cb9-9f97-b5b8060aa546" name="accounts"/>
+			</route>
+			<route >
+				<flow-ref doc:name="Flights" doc:id="d714f0db-db15-41d0-83c7-eb44034ae3a6" name="flights"/>
+			</route>
+		</scatter-gather>
+		<logger level="INFO" doc:name="Logger" doc:id="92f1abb6-5968-40e8-b875-fd350697410f"/>
+		<ee:transform doc:name="Transform Message" doc:id="2e365c69-04e7-4790-b043-586d574ac469" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
 	<flow name="accounts" doc:id="ac7a9c11-dc54-409a-b939-0f28af0e9e0d" >
 		<http:listener doc:name="HTTP: GET /accounts" doc:id="5237700e-e461-49ff-9925-a9eee436fbb7" config-ref="HTTP_Listener_config" path="/accounts"/>
 		<http:request method="GET" doc:name="HTTP: GET /accounts" doc:id="68e3c5e1-4984-4186-af2d-58e3d0ffed67" config-ref="HTTP_Request_Accounts_API" path="${accounts.endpoint}">
 			<http:headers ><![CDATA[#[output application/java
 ---
-{ 
+{
 	"Requester-ID" : "RJ45"
 }]]]></http:headers>
 			<http:query-params ><![CDATA[#[output application/java
 ---
 {
-	"type" : "personal"
+	"type" : "personal",
+	"country" : "VALUE"
 }]]]></http:query-params>
 		</http:request>
 		<json:validate-schema doc:name="Validate schema" doc:id="d9ddf101-ee1d-4d1d-b673-7763b4545eb4" schema="schemas/accountsSchema.json"/>
 	</flow>
 	<flow name="flights" doc:id="dd9ee723-226c-4a97-ae7f-ddc8448f71ce" >
 		<http:listener doc:name="HTTP: GET /flights" doc:id="f9103d96-c52a-44fb-9155-87e29a484bbc" config-ref="HTTP_Listener_config" path="/flights">
-			<http:response >
-				<http:body ><![CDATA[#[payload.body]]]></http:body>
-			</http:response>
 		</http:listener>
-		<wsc:consume doc:name="WSC: Get all flights" doc:id="f0118259-8070-4421-8da8-9ae17de4d90e" config-ref="Web_Service_Consumer_Config" operation="listAllFlights">
+		<ee:transform doc:name="Transform Message" doc:id="6959f918-a009-46ca-9c30-eebba9e8177c">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://soap.training.mulesoft.com/
+---
+{
+	ns0#findFlight: {
+		destination: "VALUE"
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<wsc:consume doc:name="WSC: Get all flights" doc:id="f0118259-8070-4421-8da8-9ae17de4d90e" config-ref="Web_Service_Consumer_Config" operation="findFlight">
 		</wsc:consume>
-		<logger level="INFO" doc:name="Logger" doc:id="514e1a3d-1305-4a4d-973f-a16856e16872" />
-		<xml-module:validate-schema doc:name="Validate schema" doc:id="fa368158-c0e5-429c-ae62-e58aea432a29" schemas="schemas/flightsSchema.xsd" config-ref="XML_Config" >
-			<xml-module:content ><![CDATA[#[payload.body]]]></xml-module:content>
+		<ee:transform doc:name="Fake Result" doc:id="bd9c1f8e-6acb-4919-aa79-be0ba5d87dd5">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://soap.training.mulesoft.com/
+---
+{
+	ns0#listAllFlightsResponse: {
+		(payload.body.ns0#findFlightResponse.*return map ( return , indexOfReturn ) -> {
+			return: {
+				airlineName: return.airlineName default "",
+				code: return.code default "",
+				departureDate: return.departureDate default "",
+				destination: return.destination default "",
+				emptySeats: return.emptySeats default 0,
+				origin: return.origin default "",
+				planeType: return.planeType default "",
+				price: return.price default 0
+			}
+		})
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<choice doc:name="Choice" doc:id="6f6f6e7b-5986-4fde-a7b6-718cffad55ab" >
+			<when expression="#[payload.listAllFlightsResponse != null]">
+				<xml-module:validate-schema doc:name="Validate schema" doc:id="fa368158-c0e5-429c-ae62-e58aea432a29" schemas="schemas/flightsSchema.xsd" config-ref="XML_Config">
 		</xml-module:validate-schema>
+			</when>
+		</choice>
 	</flow>
 </mule>

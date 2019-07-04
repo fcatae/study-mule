@@ -3,3 +3,6 @@ GET http://localhost:8081/accounts
 
 ###
 GET http://localhost:8081/flights
+
+###
+GET http://localhost:8081/process
