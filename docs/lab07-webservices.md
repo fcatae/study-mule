@@ -1,57 +1,46 @@
+# Overview #
 
 The finance department is combining Accounts and Transactions data using a spreadsheet.
 
-Implement a Process API
+## Account REST API ##
 
-Account API
-http://apdev-accounts-ws.cloudhub.io/api/accounts to request all accounts of a particular type (personal or business).
+Request all accounts of a particular type (personal or business):
 
-GET type=personal|business
-Header: Requester-ID
-Params: country?, name?
-Returns Account[]
+    GET http://apdev-accounts-ws.cloudhub.io/api/accounts 
+    Header: Requester-ID
+    Query Param: type=personal|business
+    Optional Params: country?, name?
+    Returns: Account[]
 
-Transfer Accounts API
-GET
-Requester-ID
-type=personal|business
--> Accounts API
-Response: string = number of messages processed
+## Transaction SOAP ##
 
-Mule App : Account API
-Validator or Choice
-type default
+Request all the transactions:
 
+    GET http://apdev-accounts-ws.cloudhub.io/api/transactions?wsdl
 
+    Input payload:
 
-Transaction SOAP
-
-http://apdev-accounts-ws.cloudhub.io/api/transactions?wsdl
-
-<?xml version='1.0' encoding='UTF-8'?>
-
-<ns0:GetTransactionsforCustomers xmlns:ns0="http://training.mulesoft.com/">
-
-  <customerID>4402</customerID>
-
-  <customerID>4404</customerID>
-
-  <customerID>4464</customerID>
-
-</ns0:GetTransactionsforCustomers>
-
-combine
+        <?xml version='1.0' encoding='UTF-8'?>
+        <ns0:GetTransactionsforCustomers xmlns:ns0="http://training.mulesoft.com/">
+          <customerID>4402</customerID>
+          <customerID>4404</customerID>
+          <customerID>4464</customerID>
+        </ns0:GetTransactionsforCustomers>
 
 
-{
+# TASK: Implement a Process API #
 
-  "accounts": Array of Account Objects
+Consolidate the accounts into a single API that returns:
 
-  "transactions": Array of all Transaction Objects for all accounts
+    {
+      "accounts": Array of Account Objects
+      "transactions": Array of all Transaction Objects for all accounts
+    }
 
-}
+Then, upload the data to another endpoint:
 
+    http://apdev-accounts-ws.cloudhub.io/api/accounts_transactions
 
-JOIN Accounts
-
-http://apdev-accounts-ws.cloudhub.io/api/accounts_transactions
+    This call takes more than 10 seconds, 
+    so configure the timeout (in miliseconds) appropriately.
+    

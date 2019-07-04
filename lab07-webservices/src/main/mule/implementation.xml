@@ -18,7 +18,7 @@ http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/
 		<wsc:connection wsdlLocation="http://apdev-accounts-ws.cloudhub.io/api/transactions?wsdl" service="TransactionServiceService" port="TransactionServicePort" address="http://apdev-accounts-ws.cloudhub.io/api/transactions" />
 	</wsc:config>
 	<http:request-config name="HTTP_Request_configuration1" doc:name="HTTP Request configuration" doc:id="f93dc86c-70e7-44a0-9eb1-d10643354cc2" basePath="/api">
-		<http:request-connection host="apdev-accounts-ws.cloudhub.io" usePersistentConnections="false"/>
+		<http:request-connection host="apdev-accounts-ws.cloudhub.io"/>
 	</http:request-config>
 	<flow name="Get_Account_Transactions" doc:id="4f58bd2e-aeaa-4ce8-a4c0-07df3a218bc4" >
 		<http:listener doc:name="GET /accounts_transactions" doc:id="218fac09-f9d8-4ed7-9bee-c6fff45779a1" config-ref="HTTP_Listener_config" path="/accounts_transactions"/>
