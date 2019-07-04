@@ -17,6 +17,9 @@ http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/
 	<wsc:config name="Web_Service_Consumer_Config" doc:name="Web Service Consumer Config" doc:id="43e098d0-428b-4c26-8b98-6f144d0646b1" >
 		<wsc:connection wsdlLocation="http://apdev-accounts-ws.cloudhub.io/api/transactions?wsdl" service="TransactionServiceService" port="TransactionServicePort" address="http://apdev-accounts-ws.cloudhub.io/api/transactions" />
 	</wsc:config>
+	<http:request-config name="HTTP_Request_configuration1" doc:name="HTTP Request configuration" doc:id="f93dc86c-70e7-44a0-9eb1-d10643354cc2" basePath="/api">
+		<http:request-connection host="apdev-accounts-ws.cloudhub.io" usePersistentConnections="false"/>
+	</http:request-config>
 	<flow name="Get_Account_Transactions" doc:id="4f58bd2e-aeaa-4ce8-a4c0-07df3a218bc4" >
 		<http:listener doc:name="GET /accounts_transactions" doc:id="218fac09-f9d8-4ed7-9bee-c6fff45779a1" config-ref="HTTP_Listener_config" path="/accounts_transactions"/>
 		<flow-ref doc:name="Get Accounts" doc:id="7ab670f0-db2d-4e74-a223-61805452d75b" name="Get_Accounts"/>
@@ -36,12 +39,18 @@ output application/java
 			<ee:variables >
 			</ee:variables>
 		</ee:transform>
-		<logger level="INFO" doc:name="Logger" doc:id="ebe544fc-c610-44d4-89f6-93fd42cfb0ca"/>
-		<ee:transform doc:name="Transform Message" doc:id="61632948-6c7d-4de8-9e40-8c78e83ed4d0" >
+		<ee:transform doc:name="Prepare for Upload" doc:id="61632948-6c7d-4de8-9e40-8c78e83ed4d0" >
 			<ee:message >
 				<ee:set-payload resource="dwTransform.dwl" />
 			</ee:message>
 		</ee:transform>
+		<http:request method="POST" doc:name="Request" doc:id="95f8f845-25bf-4692-9200-a642bec9780f" responseTimeout="600" config-ref="HTTP_Request_configuration1" path="/accounts_transactions">
+		</http:request>
+		<logger level="INFO" doc:name="Logger" doc:id="ebe544fc-c610-44d4-89f6-93fd42cfb0ca" />
+	</flow>
+	<flow name="Get_External" doc:id="b2d0c801-9437-4c29-9a91-6da81f7c44a2" >
+		<http:listener doc:name="GET /external" doc:id="40baf23c-dc9a-46f1-afce-f6905b4b7661" config-ref="HTTP_Listener_config" path="/external"/>
+		<http:request method="POST" doc:name="Request" doc:id="a12cd253-9f57-4815-b9ef-f6c408f509ed" url="http://apdev-accounts-ws.cloudhub.io/api/accounts_transactions" followRedirects="true" sendBodyMode="ALWAYS" requestStreamingMode="NEVER" outputMimeType="application/json" responseTimeout="30000" config-ref="HTTP_Request_configuration1"/>
 	</flow>
 	<flow name="Get_Accounts" doc:id="2d8fc926-660d-4d02-bcda-1c4f321f035e" >
 		<http:listener doc:name="GET /accounts" doc:id="91ed7994-1fa5-476f-ab85-f7393dc942b0" config-ref="HTTP_Listener_config" path="/accounts"/>
@@ -60,7 +69,7 @@ output application/java
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<http:request method="GET" doc:name="Request" doc:id="3515c89a-4b4f-44bb-a875-f38324530cb4" config-ref="HTTP_Request_configuration" path="/accounts">
+		<http:request method="GET" doc:name="Request" doc:id="3515c89a-4b4f-44bb-a875-f38324530cb4" config-ref="HTTP_Request_configuration" path="/accounts" responseTimeout="30000">
 			<http:headers ><![CDATA[#[output application/java
 ---
 {

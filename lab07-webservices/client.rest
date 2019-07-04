@@ -12,3 +12,10 @@ GET http://localhost:8081/transactions
 
 ###
 GET http://localhost:8081/accounts_transactions?type=personal
+
+###
+POST http://apdev-accounts-ws.cloudhub.io:80/api/accounts_transactions
+Content-Type: application/json
+
+###
+GET http://localhost:8081/external
