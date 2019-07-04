@@ -24,14 +24,62 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 				<flow-ref doc:name="Flights" doc:id="d714f0db-db15-41d0-83c7-eb44034ae3a6" name="flights"/>
 			</route>
 		</scatter-gather>
-		<logger level="INFO" doc:name="Logger" doc:id="92f1abb6-5968-40e8-b875-fd350697410f"/>
 		<ee:transform doc:name="Transform Message" doc:id="2e365c69-04e7-4790-b043-586d574ac469" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	accounts: payload[0].payload,
+	flights: payload[1].payload
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="92f1abb6-5968-40e8-b875-fd350697410f" />
+		<choice doc:name="Choice" doc:id="346c33d6-0172-48bc-8ae9-db257576a34c" >
+			<when expression="#[payload.accounts == [] and payload.flights.listAllFlightsResponse == null]">
+				<ee:transform doc:name="account &amp; flights EMPTY" doc:id="e4b02328-c34d-434a-bb3a-61b4dac5ffe0" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
 output application/java
 ---
 {
+	message: "BOTH accounts and flights are empty"
 }]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<when expression="payload.accounts == []">
+				<ee:transform doc:name="account EMPTY" doc:id="2a614d9b-a951-4e6a-bdf3-d310ef3577f7" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	message: "account EMPTY"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<when expression="#[payload.flights.listAllFlightsResponse == null]">
+				<ee:transform doc:name="flights EMPTY" doc:id="1b5bf3a3-608a-4882-be29-a4b2c6594fec" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	message: "flights EMPTY"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+		</choice>
+		<ee:transform doc:name="Transform Message" doc:id="f2bb763f-b4d2-4ec9-8da1-85b40e52bf6f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 	</flow>
@@ -46,8 +94,7 @@ output application/java
 			<http:query-params ><![CDATA[#[output application/java
 ---
 {
-	"type" : "personal",
-	"country" : "VALUE"
+	"type" : "personal"
 }]]]></http:query-params>
 		</http:request>
 		<json:validate-schema doc:name="Validate schema" doc:id="d9ddf101-ee1d-4d1d-b673-7763b4545eb4" schema="schemas/accountsSchema.json"/>
@@ -55,21 +102,22 @@ output application/java
 	<flow name="flights" doc:id="dd9ee723-226c-4a97-ae7f-ddc8448f71ce" >
 		<http:listener doc:name="HTTP: GET /flights" doc:id="f9103d96-c52a-44fb-9155-87e29a484bbc" config-ref="HTTP_Listener_config" path="/flights">
 		</http:listener>
-		<ee:transform doc:name="Transform Message" doc:id="6959f918-a009-46ca-9c30-eebba9e8177c">
-			<ee:message>
-				<ee:set-payload><![CDATA[%dw 2.0
+		<ee:transform doc:name="Transform Message" doc:id="5637303e-7175-4d1a-94a1-03fa10781cbe" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
 output application/xml
 ns ns0 http://soap.training.mulesoft.com/
 ---
 {
 	ns0#findFlight: {
-		destination: "VALUE"
+		destination: "LAX"
 	}
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<wsc:consume doc:name="WSC: Get all flights" doc:id="f0118259-8070-4421-8da8-9ae17de4d90e" config-ref="Web_Service_Consumer_Config" operation="findFlight">
+		<wsc:consume doc:name="WSC: Find flights" doc:id="f0118259-8070-4421-8da8-9ae17de4d90e" config-ref="Web_Service_Consumer_Config" operation="findFlight">
 		</wsc:consume>
+		<logger level="INFO" doc:name="Logger" doc:id="b9009614-0daf-44be-907c-1b4f1fc1e9d7" />
 		<ee:transform doc:name="Fake Result" doc:id="bd9c1f8e-6acb-4919-aa79-be0ba5d87dd5">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
