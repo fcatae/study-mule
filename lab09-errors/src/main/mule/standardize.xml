@@ -54,6 +54,24 @@ payload as Array map ((flight,index) ->
 				<set-payload value='#[[]]' doc:name="Set Payload" doc:id="2ae1468a-ec95-4383-a89e-22957aa09e5d"/>
 			</otherwise>
 		</choice>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="0b53a078-8f0f-4871-860f-c684ffd0d0e7" type="HTTP:BAD_REQUEST">
+				<ee:transform doc:name="Transform Message" doc:id="4865a560-7e44-4934-8551-e31d3f624d98" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+[]]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-continue>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="ff445294-7cdf-4151-b3f9-e5d28a6f21ca" type="EXPRESSION">
+				<logger level="INFO" doc:name="Logger" doc:id="6de5fc94-6a32-4858-b419-fceb42b692c5" message="ERROR AMERICAN - EXPRESSION"/>
+			</on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="8d243ee3-6fab-45ce-be97-e3c25cca7e3f" >
+				<logger level="INFO" doc:name="Logger" doc:id="3d345787-5273-41c6-8825-c2815ba89040" message="ERROR AMERICAN - OTHER EXCEPTIONS"/>
+			</on-error-propagate>
+		</error-handler>
 	</flow>
 	<flow name="getUnited" doc:id="bb5b84aa-df6b-4e13-be74-375bce1db7df" >
 		<http:request method="GET" doc:name="Get United Flights" doc:id="ff859208-c4cf-40b6-a274-08a7d3fc8685" config-ref="HTTP_Request_United" path="${united.path}/{destinationCode}">
