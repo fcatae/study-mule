@@ -21,6 +21,12 @@ http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/
 	<http:request-config name="HTTP_Request_United" doc:name="HTTP Request configuration" doc:id="d3b79d3d-dfec-4736-9189-05eb3fc0508b" >
 		<http:request-connection host="${united.host}" port="${united.port}" />
 	</http:request-config>
+	<configuration doc:name="Configuration" doc:id="4d323587-dd4e-441d-8a4d-0187c1a37f31" defaultErrorHandler-ref="globalError_Handler" />
+	<error-handler name="globalError_Handler" doc:id="f7e466e6-362f-4e92-b2a4-936572a0a677" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="9719fc90-9aa0-486d-8600-1e99fdddb4be" >
+			<logger level="INFO" doc:name="Logger" doc:id="620c8745-19d3-4125-8b27-c0d0f82ff6e1" message='#["ERROR: " ++ error.errorType.namespace ++ ", " ++ error.errorType.identifier]'/>
+		</on-error-propagate>
+	</error-handler>
 
 	
 	
