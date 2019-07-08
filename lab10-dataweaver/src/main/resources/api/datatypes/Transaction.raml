@@ -1,0 +1,25 @@
+#%RAML 1.0 DataType
+
+type: object
+properties:
+  id: 
+    type: string
+    xml:
+      attribute: true
+      name: "transID"
+  amount:
+    type: number
+    xml:
+      attribute: true
+  idCustomer: string
+  nameCustomer: string
+  accountType: string
+  amountUSFormatted:
+    type: string
+    required: false
+    description: Amount formatted according to US decimal standards, such as 123,384.10
+  amountEUFormatted:
+    type: string
+    required: false
+    description: Amount formatted according to a Europe standard, such as 123.384,10
+  region: string

@@ -1,0 +1,29 @@
+#%RAML 1.0
+title: MUA Flights Transactions API
+version: 1.0
+
+types: 
+  Flight: !include datatypes/Flight.raml
+  
+/flightstrans:
+  get:
+    headers:
+      Requester-ID:
+        description: id of the person requesting the accounts information
+        required: true
+    displayName: Get flights
+    queryParameters:
+      code:
+        displayName: Destination airport code
+        required: true
+        enum: [SFO, LAX, PDX, CLE, PDF]
+      airline:
+        displayName: Airline
+        required: false
+        enum: [united, delta, american]
+    responses:
+      200:
+        body:
+          application/xml:
+            type: Flight[]
+            example: !include examples/FlightsExample.raml
