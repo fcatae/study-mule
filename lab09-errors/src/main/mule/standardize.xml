@@ -54,28 +54,30 @@ payload as Array map ((flight,index) ->
 				<set-payload value='#[[]]' doc:name="Set Payload" doc:id="2ae1468a-ec95-4383-a89e-22957aa09e5d"/>
 			</otherwise>
 		</choice>
-		<error-handler >
-			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="0b53a078-8f0f-4871-860f-c684ffd0d0e7" type="HTTP:BAD_REQUEST">
-				<ee:transform doc:name="Transform Message" doc:id="4865a560-7e44-4934-8551-e31d3f624d98" >
-					<ee:message >
-						<ee:set-payload ><![CDATA[%dw 2.0
+		<error-handler ref="standardize-error-handler"/>
+		
+	</flow>
+	<error-handler name="standardize-error-handler" doc:id="af88c7b5-adfb-4d72-b4a5-3bd857da038f" >
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="0b53a078-8f0f-4871-860f-c684ffd0d0e7" type="HTTP:BAD_REQUEST">
+				<ee:transform doc:name="Transform Message" doc:id="4865a560-7e44-4934-8551-e31d3f624d98">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 []]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
 			</on-error-continue>
-			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="ff445294-7cdf-4151-b3f9-e5d28a6f21ca" type="EXPRESSION">
-				<logger level="INFO" doc:name="Logger" doc:id="6de5fc94-6a32-4858-b419-fceb42b692c5" message="ERROR AMERICAN - EXPRESSION"/>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="ff445294-7cdf-4151-b3f9-e5d28a6f21ca" type="EXPRESSION">
+				<logger level="INFO" doc:name="Logger" doc:id="6de5fc94-6a32-4858-b419-fceb42b692c5" message="ERROR AMERICAN - EXPRESSION" />
 			</on-error-propagate>
-			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="8d243ee3-6fab-45ce-be97-e3c25cca7e3f" >
-				<logger level="INFO" doc:name="Logger" doc:id="3d345787-5273-41c6-8825-c2815ba89040" message="ERROR AMERICAN - OTHER EXCEPTIONS"/>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="8d243ee3-6fab-45ce-be97-e3c25cca7e3f">
+				<logger level="INFO" doc:name="Logger" doc:id="3d345787-5273-41c6-8825-c2815ba89040" message="ERROR AMERICAN - OTHER EXCEPTIONS" />
 			</on-error-propagate>
-		</error-handler>
-	</flow>
+	</error-handler>
 	<flow name="getUnited" doc:id="bb5b84aa-df6b-4e13-be74-375bce1db7df" >
 		<http:request method="GET" doc:name="Get United Flights" doc:id="ff859208-c4cf-40b6-a274-08a7d3fc8685" config-ref="HTTP_Request_United" path="${united.path}/{destinationCode}">
-			<http:uri-params ><![CDATA[#[output applicaton/java
+			<http:uri-params ><![CDATA[#[output application/java
 ---
 {
 	destinationCode : vars.destinationCode
@@ -111,6 +113,7 @@ output application/json
 				<set-payload value="#[[]]" doc:name="Set Payload" doc:id="cd5e240b-e5a6-46e8-9cc5-a0bea089e590" />
 			</otherwise>
 		</choice>
+		<error-handler ref="standardize-error-handler"/>
 	</flow>
 	<flow name="getDelta" doc:id="6c6e6047-3562-4b5e-8258-57162bb3c4d4" >
 		<ee:transform doc:name="Build SOAP request" doc:id="7a7a8d53-a6e8-4062-8e3b-ace9b0e765ef" >
@@ -126,8 +129,30 @@ ns ns0 http://soap.training.mulesoft.com/
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<wsc:consume doc:name="Consume" doc:id="7ea12163-be51-4a88-b246-878b873fd4c6" config-ref="Web_Service_Delta" operation="findFlight"/>
-		<logger level="INFO" doc:name="Logger" doc:id="a928a159-4d3f-4a5c-9989-e6c14d39c00e" message='#["Delta payload type: " ++ typeOf(payload.body)]'/>
+		<try doc:name="Try" doc:id="ee0ac642-d5a2-4ec2-8744-aeb3a70f6ce4" >
+			<wsc:consume doc:name="Consume" doc:id="7ea12163-be51-4a88-b246-878b873fd4c6" config-ref="Web_Service_Delta" operation="findFlight" />
+			<logger level="INFO" doc:name="Logger" doc:id="a928a159-4d3f-4a5c-9989-e6c14d39c00e" message='#["Delta payload type: " ++ typeOf(payload.body)]' />
+			<error-handler >
+				<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="2091711a-dc0f-4df3-8283-dcc01d1c2cb6" type="WSC:SOAP_FAULT">
+					<logger level="INFO" doc:name="Logger" doc:id="689b9dda-a88e-41f6-ba05-f36f2a175e99" message="ERROR DELTA - Operations"/>
+				</on-error-propagate>
+				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="143d7111-73c6-468c-8149-7def37a39542" type="WSC:BAD_REQUEST, WSC:BAD_RESPONSE, WSC:RETRY_EXHAUSTED, WSC:TIMEOUT">
+					<logger level="INFO" doc:name="Logger" doc:id="ef4166d6-794d-486f-b2ee-1129e852e7a7" message="ERROR DELTA - CONTINUE"/>
+					<ee:transform doc:name="Transform Message" doc:id="5953e245-1623-4666-8a03-8ede794808c3" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+}]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+				</on-error-continue>
+				<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="2d74c656-fa2f-4331-91b4-998bd7b658be" type="ANY" when='#[ error.errorType.namespace == "WSC" ]'>
+					<logger level="INFO" doc:name="Logger" doc:id="b1426c45-a3ea-481e-8e56-b67bc77a4cf8" message="ERROR DELTA - OTHERS WSC"/>
+				</on-error-propagate>
+			</error-handler>
+		</try>
 		<ee:transform doc:name="Transform Message" doc:id="22d2247f-206e-4cfb-82a4-a7a3aade1d6d" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -148,5 +173,6 @@ output application/json
 )]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
+		<error-handler ref="standardize-error-handler"/>
 	</flow>
 </mule>

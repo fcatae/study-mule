@@ -1,2 +1,8 @@
 GET http://localhost:8081/flights/MUA?maxprice=1000
 
+###
+GET http://localhost:8081/flights/SFO?maxprice=1000
+
+###
+GET http://localhost:8081/flow
+

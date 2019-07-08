@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc"
-	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
-	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
-http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd">
+http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 	
 	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="cea44bb2-63bd-4022-a254-884961d74428" >
 		<http:listener-connection host="0.0.0.0" port="8081" />
@@ -21,12 +23,34 @@ http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/
 	<http:request-config name="HTTP_Request_United" doc:name="HTTP Request configuration" doc:id="d3b79d3d-dfec-4736-9189-05eb3fc0508b" >
 		<http:request-connection host="${united.host}" port="${united.port}" />
 	</http:request-config>
-	<configuration doc:name="Configuration" doc:id="4d323587-dd4e-441d-8a4d-0187c1a37f31" defaultErrorHandler-ref="globalError_Handler" />
 	<error-handler name="globalError_Handler" doc:id="f7e466e6-362f-4e92-b2a4-936572a0a677" >
 		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="9719fc90-9aa0-486d-8600-1e99fdddb4be" >
 			<logger level="INFO" doc:name="Logger" doc:id="620c8745-19d3-4125-8b27-c0d0f82ff6e1" message='#["ERROR: " ++ error.errorType.namespace ++ ", " ++ error.errorType.identifier]'/>
 		</on-error-propagate>
 	</error-handler>
+	<flow name="flow1" doc:id="1fdd4c69-2089-47ca-8063-5d7c6b3d2444" >
+		<logger level="INFO" doc:name="Logger" doc:id="fb47ca08-04ce-4249-9faf-a2032d9c5685" message="FLOW1-PREEXCEPTION"/>
+		<flow-ref doc:name="Ref Flow #2" doc:id="da47d1ef-bfd1-4551-bf89-e62da18913e0" name="flow2"/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="9f8bfec3-a47f-4fa4-8755-f5bdb0ca951e" >
+				<logger level="INFO" doc:name="Logger" doc:id="e737c9dc-14e8-4415-befb-5c2d290f04bf" message="ERROR PROP FLOW 1"/>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="flow2" doc:id="0e2e51f9-9e97-4f75-93df-b6194a4fed02" >
+		<logger level="INFO" doc:name="Logger" doc:id="5446c35d-470a-44a4-91ca-33ce3ec045b1" message="FLOW2-PREEXCEPTION"/>
+		<try doc:name="Try" doc:id="a8e9534e-f2a2-484e-8a06-70a9388a787d" >
+			<validation:is-not-null doc:name="Is not null" doc:id="b0cdc27a-c549-4034-9d48-c21454cc5604" value="#[attributes.queryParams.flow]" />
+			<error-handler >
+				<on-error-propagate enableNotifications="false" logException="false" doc:name="On Error Propagate" doc:id="9838466b-15a7-4b3e-bcc7-98cf166b147f" />
+			</error-handler>
+		</try>
+		<error-handler>
+			<on-error-propagate enableNotifications="false" logException="false" doc:name="On Error Propagate" doc:id="75113118-e410-459f-bf8c-4f223ac9f849" >
+				<logger level="INFO" doc:name="Logger" doc:id="de2e9c2d-aa56-4189-a157-66a65f042de3" message="ERROR PROP FLOW 2"/>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
 
 	
 	

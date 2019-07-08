@@ -32,6 +32,9 @@ http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mu
 			<route >
 				<flow-ref doc:name="getAmerican" doc:id="fab0d5c9-5240-44fd-bea8-c04db507564d" name="getAmerican"/>
 			</route>
+			<route >
+				<flow-ref doc:name="Flow#1" doc:id="43101685-335c-4564-84af-791d2be131e2" name="flow1"/>
+			</route>
 		</scatter-gather>
 		<ee:transform doc:name="Convert to JSON" doc:id="9249779c-bddd-4393-8719-3b51960cdfa6" >
 			<ee:message >
@@ -47,5 +50,15 @@ using (flattened = flatten(payload..payload as Array) )
 )]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
+	</flow>
+	<flow name="gatherdataFlow" doc:id="7f2ad011-d036-4667-b85e-eadaafd9dbf9" >
+		<http:listener doc:name="GET /flow" doc:id="d67c463b-33c3-4f5a-9d1f-1f41e19947b8" config-ref="HTTP_Listener_config" path="/flow"/>
+		<flow-ref doc:name="Ref Flow #1" doc:id="b851da2f-ece8-4aaf-9335-bc2faec1111e" name="flow1"/>
+		<logger level="INFO" doc:name="Logger" doc:id="fa70533d-b927-418a-a09a-0db9f65f207c" message="GET /FLOW SUCCESS"/>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="a98f2da4-2dad-496b-9b60-8a2a43ddba4f">
+				<logger level="INFO" doc:name="Logger" doc:id="e6593d93-356b-41da-b663-79e4778e8fc2" message="CONTINUE OK"/>
+			</on-error-continue>
+		</error-handler>
 	</flow>
 </mule>
