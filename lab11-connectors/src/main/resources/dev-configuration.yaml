@@ -1,0 +1,26 @@
+#Master App Server
+master:
+  fileIn: "Desktop/files/input"
+  fileProcessed: "Desktop/files/processed"
+  fileWrite: "Desktop/files/output"
+
+#Partner 1 Database
+#Dev will use in-memory Derby Database
+partner1:
+  db:
+    url: "jdbc:derby:memory:training"
+    driver: "org.apache.derby.jdbc.EmbeddedDriver"
+
+#Partner 2 FTP Credentials. 
+#Dev will use in-memory FTP server using MockFtpServer Java package. Change the port number here if your local machine is currently using port 9178
+partner2:
+  ftp:
+    host: "localhost"
+    port: "9178"
+    username: "user"
+    password: "password"
+    root: "/data/"
+    
+#Partner 3 File Server
+partner3:
+  fileWrite: "Desktop/partner3/receive"

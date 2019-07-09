@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ftp="http://www.mulesoft.org/schema/mule/ftp"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd 
+http://www.mulesoft.org/schema/mule/ftp http://www.mulesoft.org/schema/mule/ftp/current/mule-ftp.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	
+		<flow name="testFTP" doc:id="0ff551ad-5177-4157-970c-12537054233e">
+		<scheduler doc:name="Scheduler" doc:id="12f24a5a-e3f6-4043-9797-d19fdfecc5af" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="60" timeUnit="SECONDS"/>
+			</scheduling-strategy>
+		</scheduler>
+		<ftp:read doc:name="FTP" doc:id="f6242b03-5c82-4801-9184-58fe4a958ba8" path="test/testfile.csv" config-ref="Partner2_FTP_Config"/>
+		<logger level="INFO" doc:name="Log Payload" doc:id="7b8da061-7c8c-4725-a85c-c6171f458b11" message='#["\nTest file from FTP In-Memory Server :\n" ++ write(payload,"application/csv")]'/>
+	</flow>
+	<flow name="testDB" doc:id="2f8bd76a-bd66-4096-a1a5-355be2399867">
+		<scheduler doc:name="Scheduler" doc:id="fb946855-affc-4a3a-b1f1-4494f685d691" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="120" startDelay="5" timeUnit="SECONDS"/>
+			</scheduling-strategy>
+		</scheduler>
+		<db:select doc:name="Select" doc:id="a03e022c-c914-4f46-b6bc-23a0ff5488b6" config-ref="Partner1_Database_Configuration">
+			<db:sql >SELECT * FROM Giftcards</db:sql>
+		</db:select>
+		<logger level="INFO" doc:name="Log Payload" doc:id="1c89578b-9d24-438c-8d2d-7c6636d8f8e7" message='#["\nTest Payload from Derby In-Memory Database:\n" ++ write(payload,"application/json")]'/>
+	</flow>
+	
+	
+	
+	
+	
+	
+	</mule>
