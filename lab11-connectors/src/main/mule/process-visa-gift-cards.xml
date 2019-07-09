@@ -15,7 +15,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 			</scheduling-strategy>
 			<file:matcher filenamePattern="*.csv" />
 		</file:listener>
-		<logger level="INFO" doc:name="Logger" doc:id="27a5d1ba-a6ed-4974-81a4-69e0fead4dae" message="LOG1: #[payload]"/>
+		<logger level="INFO" doc:name="Logger" doc:id="27a5d1ba-a6ed-4974-81a4-69e0fead4dae" message='LOG1: #[ write(payload,"application/json")]'/>
 		<ee:transform doc:name="Transform Message" doc:id="1d2665f8-8e93-4b56-ba52-cd9b825f9485" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0

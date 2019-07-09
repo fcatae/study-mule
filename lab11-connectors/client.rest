@@ -1,0 +1,10 @@
+GET http://localhost:8081/foo
+
+###
+POST http://localhost:8081/food
+Content-Type: application/json
+
+{
+    "card_no": "T2",
+    "amount_granted": 2.3
+}

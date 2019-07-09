@@ -34,5 +34,19 @@ http://www.mulesoft.org/schema/mule/ftp http://www.mulesoft.org/schema/mule/ftp/
 	<ftp:config name="Partner2_FTP_Config" doc:name="FTP Config" doc:id="1d24cdbb-d6c1-41d8-8ee7-8c85122a796d" >
 		<ftp:connection host="${partner2.ftp.host}" port="${partner2.ftp.port}" username="${partner2.ftp.username}" password="${partner2.ftp.password}" workingDir="${partner2.ftp.root}"/>
 	</ftp:config>
+	<flow name="foodFlow" doc:id="42b79517-3869-4581-a075-c54c36a1c490" >
+		<http:listener doc:name="GET /food" doc:id="83a95283-cd43-445e-9ff3-efbaf24edfef" config-ref="HTTP_Listener_config" path="/food"/>
+		<db:select doc:name="Select" doc:id="35c26b1f-a6bc-4bd2-bfea-e518124bb8b7" config-ref="Partner1_Database_Configuration"/>
+		<ee:transform doc:name="Transform Message" doc:id="15c990f4-fbde-4864-9fe0-5c7191af3860" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: "success"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
 
 </mule>

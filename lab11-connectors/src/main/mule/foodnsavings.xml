@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="foodnsavingsFlow1" doc:id="6e95827a-181c-4e75-8291-580a7a2c69a2" >
+		<http:listener doc:name="POST /food" doc:id="7984042f-b041-4151-9f55-183ae9b5d4b7" config-ref="HTTP_Listener_config" path="/food" allowedMethods="POST"/>
+		<ee:transform doc:name="Transform Message" doc:id="114081d1-8c45-4956-8221-a0dc26ab0967" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	number: payload.card_no,
+	balance: payload.amount_granted,
+	sourceID: "TEST",
+	createdOn: now() as String {format: "yyyy-MM-dd hh:mm:ss"}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<db:insert doc:name="Insert" doc:id="c83ee46c-51ef-485e-a8ed-7e2ec639ea0a" config-ref="Partner1_Database_Configuration">
+			<db:sql >INSERT INTO Giftcards (NUMBER, BALANCE, SOURCEID, CREATEDON) VALUES (:n,:b,:s,:c)</db:sql>
+			<db:input-parameters ><![CDATA[#[{"n": payload.number, "b": payload.balance, "s": payload.sourceID, "c": payload.createdOn }]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Transform Message" doc:id="94756202-cc62-4265-ade7-7b6d2dd8d831" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	msg: "success",
+	data: payload
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="foodnsavingsFlow" doc:id="890f5ea2-b0d1-45d4-911c-e979fae39b11" >
+		<http:listener doc:name="GET /foo" doc:id="887e8346-e98b-4124-bed7-3d049eb0d352" config-ref="HTTP_Listener_config" path="/foo"/>
+		<db:select doc:name="Select" doc:id="3e1aedbd-98d3-4f90-8a19-59a9fa4314b7" config-ref="Partner1_Database_Configuration">
+			<db:sql >SELECT * FROM Giftcards</db:sql>
+		</db:select>
+		<logger level="INFO" doc:name="Logger" doc:id="d74f1949-0ec9-442c-b33f-0c9124ece964" message='#["OK: " ++ write(payload,"application/json")]'/>
+		<ee:transform doc:name="Transform Message" doc:id="7bb868f7-2aba-4cf3-89a7-e3a062326438" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": payload map {
+		id: $.NUMBER,
+		b: $.BALANCE,
+		c: $.CREATEDON
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
