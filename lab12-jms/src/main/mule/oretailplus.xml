@@ -13,8 +13,9 @@ http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/fil
 	</flow>
 	<flow name="oRetailPlus" doc:id="0789aab5-3b72-4e63-bd91-a9cdfa50300f" >
 		<set-variable value="#[sizeOf(payload)]" doc:name="recordCount" doc:id="acc5d473-9022-43a5-9b74-d0d1b76b046b" variableName="recordCount"/>
-		<file:write doc:name="File" doc:id="2efff15d-4c9a-47b1-b2c7-10cf05f23090" path="#[ p('partner3.fileWrite') ++ '/MULEBANK-$(now() as Number)-$(vars.recordCount).csv']">
+		<file:write doc:name="File" doc:id="2efff15d-4c9a-47b1-b2c7-10cf05f23090" path="#[p('partner3.fileWrite') ++ '/MULEBANK-$(now() as Number)-$(vars.recordCount).csv']">
 			<file:content ><![CDATA[#[output application/csv --- payload]]]></file:content>
 		</file:write>
+		<logger level="INFO" doc:name="Logger" doc:id="395ab6ec-4ab3-4f73-b8b0-1608687a7908" message="#[&quot;FILE OUTPUT &quot; ++ p('partner3.fileWrite') ++ '/MULEBANK-$(now() as Number)-$(vars.recordCount).csv']"/>
 	</flow>
 </mule>

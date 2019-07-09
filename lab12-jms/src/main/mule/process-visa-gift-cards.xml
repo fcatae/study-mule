@@ -111,14 +111,10 @@ payload map ((giftcard) ->
 	</sub-flow>
 	<sub-flow name="jmsOnlineRetail" doc:id="512f8d39-560e-4921-a144-3b382811f27b" >
 		<logger level="INFO" doc:name="Logger" doc:id="4735d6ea-53dd-49f8-9499-4f9671d1ec1e" message="ONLINE FILE #[ attributes.fileName ]"/>
-		<ee:transform doc:name="Transform Message" doc:id="9be25e9b-9e55-4007-80da-fe7f592ea510" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/java
----
-payload]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<jms:publish doc:name="queue: online" doc:id="b935acb5-89ff-4e7c-9d25-ace98ca835d1" config-ref="JMS_Config" destination="online"/>
+		<jms:publish doc:name="queue: online" doc:id="b935acb5-89ff-4e7c-9d25-ace98ca835d1" config-ref="JMS_Config" destination="online">
+			<jms:message >
+				<jms:body ><![CDATA[#[output application/json --- payload]]]></jms:body>
+			</jms:message>
+		</jms:publish>
 	</sub-flow>
 </mule>
