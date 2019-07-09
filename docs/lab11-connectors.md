@@ -25,3 +25,40 @@ The integration is tightly coupled to the partner systems:
 
     ESB:
     - JMS message
+
+
+# Maven Dependencies #
+
+Configure local Maven repository (`.m2`) to load the dependencies
+
+If the project fails to load the dependencies, force the update with `mvn -U compile`
+
+# Database module #
+
+Configure the necessary dependencies in `pom.xml` file.
+
+Derby database:
+
+        <dependency>
+            <groupId>org.apache.derby</groupId>
+            <artifactId>derby</artifactId>
+            <version>10.14.1.0</version>
+        </dependency>
+
+For generic JDBC connectivity:
+
+1. Choose `Generic Connection` in the Database Configuration
+2. Add dependencies to the project using `Required Libraries`
+3. Configure `URL` and `Driver class name`
+
+# Conectors #
+
+Listeners:
+- File: On New File
+- FTP: On New File
+- Database: On Table Row
+
+Send Data:
+- File: Write
+- FTP: Write
+- Database: Insert
