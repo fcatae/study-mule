@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<file:config name="Visa_File_Config" doc:name="File Config" doc:id="110ceb79-506d-432a-a71b-21b00ae500b1" >
+		<file:connection workingDir="${fabricio.visa}" />
+	</file:config>
+	<flow name="VisaGiftCards" doc:id="e74ddac4-ab31-4ac7-a775-9b30976071c4" >
+		<file:listener doc:name="On New or Updated File" doc:id="b5f3fbdb-9d47-41e4-b781-92992352c5a7" config-ref="Visa_File_Config" recursive="false" autoDelete="true">
+			<scheduling-strategy >
+				<fixed-frequency />
+			</scheduling-strategy>
+			<file:matcher filenamePattern="*.csv" />
+		</file:listener>
+		<logger level="INFO" doc:name="Logger" doc:id="27a5d1ba-a6ed-4974-81a4-69e0fead4dae" message="LOG1: #[payload]"/>
+		<ee:transform doc:name="Transform Message" doc:id="1d2665f8-8e93-4b56-ba52-cd9b825f9485" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	payload: payload,
+	attributes: attributes	
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="3425832f-c4bf-4818-bbce-5544eb977a5e" message="PROCESSED2 FILE #[payload]"/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="26158253-8a37-4fc1-a9c7-05c99231501b" >
+				<logger level="INFO" doc:name="Logger" doc:id="2e937c7a-9b50-4322-9310-a1c27c7321cc" message="EXCEPTION #[ error ]"/>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+</mule>

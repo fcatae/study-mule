@@ -24,3 +24,7 @@ partner2:
 #Partner 3 File Server
 partner3:
   fileWrite: "Desktop/partner3/receive"
+  
+#Fabricio
+fabricio:
+  visa: "/Users/fcatae/Desktop/study-mule/lab11-connectors/tmp"
