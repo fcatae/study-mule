@@ -62,3 +62,4 @@ Send Data:
 - File: Write
 - FTP: Write
 - Database: Insert
+- Database: Bulk Insert
