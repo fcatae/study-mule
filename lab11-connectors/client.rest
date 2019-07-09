@@ -8,3 +8,16 @@ Content-Type: application/json
     "card_no": "T2",
     "amount_granted": 2.3
 }
+
+###
+POST http://localhost:8081/meals
+Content-type: application/json
+
+{
+	"card_no": "v6",
+	"amount_granted": 111
+},
+{
+	"card_no": "v7",
+	"amount_granted": 222
+}

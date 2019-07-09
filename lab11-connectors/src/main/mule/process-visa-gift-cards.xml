@@ -30,6 +30,9 @@ payload[0]]]></ee:set-payload>
 				<when expression='#[payload.partner == "Food and Savings"]'>
 					<flow-ref doc:name="Ref Food N Savings" doc:id="fdefe230-f430-46eb-a5f2-a93ea4415be7" name="subflow_Food_N_Savings"/>
 				</when>
+				<when expression='#[payload.partner == "Meals n Go"]'>
+					<flow-ref doc:name="Flow Reference" doc:id="2ad81eff-bef3-4eb5-9b83-b99a01fa2a62" name="subflow_Meals_N_Go"/>
+				</when>
 				<otherwise >
 					<logger level="INFO" doc:name="Copy_of_Logger" doc:id="1f22c5f4-c5e4-4371-924f-9156203326be" message='UNPROCESSED #[ payload.partner ]' />
 				</otherwise>
@@ -40,4 +43,8 @@ payload[0]]]></ee:set-payload>
 		<logger level="INFO" doc:name="Logger" doc:id="3425832f-c4bf-4818-bbce-5544eb977a5e" message='#["\n PROCESSED2 FILE\n"] #[payload]' />
 		<flow-ref doc:name="REF foodnsavings Flow" doc:id="72d9ce49-bf2c-42eb-89c5-29d7758e8064" name="external_foodnsavings_insert"/>
 	</flow>
+	<sub-flow name="subflow_Meals_N_Go" doc:id="423be566-7821-4b8d-ac22-76a8fff7fa35" >
+		<logger level="INFO" doc:name="Logger" doc:id="ab0b0bb9-bf6f-4c90-a9f3-4846d388bfe7" message='#["\n PROCESSED FILE\n"] #[payload]' />
+		<flow-ref doc:name="Flow Reference" doc:id="e77c030d-7a09-480e-830a-631e5039a561" name="external_meals"/>
+	</sub-flow>
 </mule>

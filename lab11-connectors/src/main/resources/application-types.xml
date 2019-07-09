@@ -13,6 +13,18 @@ type input_visa_file = Array<{|  card_no: String,   processor_id: String,   amou
         <types:property name="isQuotedString" value="false"/>
       </types:properties>
     </types:type>
+    <types:type name="output_meals_csv" format="csv">
+      <types:shape format="weave"><![CDATA[%dw 2.0
+
+type output_meals_csv = Array<{|  gc_card_number: String,   gc_balance: String,   origin: String,   card_type: String,   expiration: String|}>
+
+]]></types:shape>
+      <types:properties>
+        <types:property name="headerLineNumber" value="0"/>
+        <types:property name="header" value="true"/>
+        <types:property name="isQuotedString" value="false"/>
+      </types:properties>
+    </types:type>
   </types:catalog>
   <types:enrichment select="#3bc16a71-743c-4dc2-ba01-de393d249066">
     <types:processor-declaration>
@@ -22,5 +34,12 @@ type input_visa_file = Array<{|  card_no: String,   processor_id: String,   amou
         </types:message>
       </types:input-event>
     </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#05041e75-7772-45e3-81d2-c495d6037c2c">
+    <types:operation-declaration>
+      <types:inputs>
+        <types:parameter name="content" type="output_meals_csv"/>
+      </types:inputs>
+    </types:operation-declaration>
   </types:enrichment>
 </types:mule>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ftp="http://www.mulesoft.org/schema/mule/ftp" xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ftp http://www.mulesoft.org/schema/mule/ftp/current/mule-ftp.xsd">
+	<file:config name="FTP_Config" doc:name="File Config" doc:id="6c0f4e65-ea7e-4608-a890-8830cc926d70" />
+	<flow name="external_meals" doc:id="c766a8fc-95f5-48a4-bff7-823e03431ecd" >
+		<http:listener doc:name="GET /meals" doc:id="51268d44-9078-42d8-a4ad-442912e3849e" config-ref="HTTP_Listener_config" path="/meals"/>
+		<set-variable value='#["MULEBANK-gc-" ++ (now() as String {format: "yyyy-MM-dd_hh-mm-ss.SSS"}) ++ ".csv"]' doc:name="SetFilename" doc:id="7952060c-803c-4bdf-a00a-6b4b033e47e7" variableName="filename"/>
+		<set-variable value="#[now() + |P3M|]" doc:name="SetExpiration" doc:id="a18c189b-dc11-4aa9-9a44-97442850d228" variableName="expiration"/>
+		<ee:transform doc:name="Transform into Array" doc:id="ebdaf64a-fc54-4ec8-984f-e57308907e28" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+[payload]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Convert" doc:id="846b2caf-b6ab-43d5-ad9b-e244be995de8" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map (
+{
+	gc_card_number: $.card_no,
+	gc_balance: $.amount_granted,
+	origin: "MULEBANK-0949",
+	card_type: "VISA",
+	expiration: (vars.expiration as Number)
+})]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ftp:write doc:name="FTP Upload" doc:id="05041e75-7772-45e3-81d2-c495d6037c2c" config-ref="Partner2_FTP_Config" path="#[vars.filename]">
+			<ftp:content ><![CDATA[#[%dw 2.0
+output application/csv
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	gc_card_number: payload01.gc_card_number,
+	gc_balance: payload01.gc_balance as String,
+	origin: payload01.origin,
+	card_type: payload01.card_type,
+	expiration: payload01.expiration as String
+}]]]></ftp:content>
+		</ftp:write>
+		<ee:transform doc:name="Transform Message" doc:id="6f59739e-0ab4-414a-84e1-69dd91a2b22e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
