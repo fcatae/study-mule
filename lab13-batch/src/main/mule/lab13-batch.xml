@@ -1,21 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
-	xmlns:http="http://www.mulesoft.org/schema/mule/http"
-	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
-http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd">
 	<db:config name="Database_Config" doc:name="Database Config" doc:id="03894428-2bb3-4f76-a6e8-c62857555a40" >
 		<db:my-sql-connection host="mudb.learn.mulesoft.com" port="3306" user="mule" password="mule" database="training" />
 	</db:config>
 	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="d5e12487-cb5e-44d0-bed2-d85fd78dca9f" >
 		<http:listener-connection host="0.0.0.0" port="8081" />
 	</http:listener-config>
+	<vm:config name="VM_Config" doc:name="VM Config" doc:id="cb53a728-0328-4b09-87b0-d0241d97a1b8" >
+		<vm:queues >
+			<vm:queue queueName="approval" />
+		</vm:queues>
+	</vm:config>
+	<flow name="lab13-batchFlow1" doc:id="f988f7e2-84f6-41b9-bd84-3e4a29b3f849" >
+		<http:listener doc:name="POST /batch" doc:id="cbdde003-082e-4a03-bbf0-cf10320df299" config-ref="HTTP_Listener_config" path="/batch"/>
+		<batch:job jobName="batch_process" doc:id="9b31e18f-8723-401f-8524-6487ceb8c4c1" >
+			<batch:process-records >
+				<batch:step name="step_parallel_validation" doc:id="a7d7239f-a132-4d7e-8283-4c9bd46fb931" >
+					<ee:transform doc:name="Transform Message" doc:id="5fcd9096-717f-4ac7-a424-e63f5c80420f" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	transactionId: payload
+}]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+					<vm:publish-consume queueName="approval" doc:name="Validate Approval" doc:id="33458767-5772-4ae8-894d-f4331c0771b9" config-ref="VM_Config" target="validation"/>
+				</batch:step>
+				<batch:step name="step_file_logger" doc:id="6d32a3a6-e385-47b0-9943-a51e0edf4600" acceptExpression="#[ vars.validation == true ]">
+					<batch:aggregator doc:name="agg_csv_file" doc:id="43e97bcc-c0f9-4627-b8f1-aa2c7f3c0833" size="3">
+						<logger level="INFO" doc:name="Logger" doc:id="7e6a4255-b0fb-43f8-a112-0c9fbe6d185e" message="CRITICAL PAYLOAD #[payload]"/>
+					</batch:aggregator>
+				</batch:step>
+			</batch:process-records>
+		</batch:job>
+	</flow>
 	<flow name="lab13-batchFlow" doc:id="71b4e0dc-6e92-4975-ad52-b332f0491fe2" >
 		<http:listener doc:name="POST /run" doc:id="09d88642-0620-4f2b-b752-7c3ee704f857" path="/run" config-ref="HTTP_Listener_config"/>
+		<set-variable value="#[payload.minId default 0]" doc:name="SetMinId" doc:id="fd4826a4-d223-424c-9bc4-cb911e324323" variableName="minId"/>
 		<db:select doc:name="Select" doc:id="b66b818c-ea8b-424b-82be-0d7ef3516b58" config-ref="Database_Config">
-			<db:sql >SELECT * FROM flights_transactions LIMIT 5</db:sql>
+			<db:sql >SELECT * FROM flights_transactions WHERE transactionID&gt;:minId ORDER BY transactionID LIMIT 5</db:sql>
+			<db:input-parameters ><![CDATA[#[{"minId": vars.minId}]]]></db:input-parameters>
 		</db:select>
 		<ee:transform doc:name="Transform Message" doc:id="1f3c9d62-f846-4f65-81ac-6e6f61036076" >
 			<ee:message >
@@ -23,6 +57,32 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 output application/json
 ---
 payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="flow_approval_process" doc:id="c64d02cd-5f37-4c43-94af-4c6378c6f70a" >
+		<vm:listener doc:name="Queue Compliance" doc:id="157e738a-28ac-48c1-8625-abfada0e6e96" config-ref="VM_Config" queueName="approval"/>
+		<ee:transform doc:name="Transform Message" doc:id="543b8629-86a4-4846-992d-971cb4a9811d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	id: payload.transactionId,
+	result: if( mod(payload.transactionId as Number, 4) == 0)
+				true
+			else
+				false	
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="69ce6623-c13f-4438-adbc-af9518c1680e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload.result]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 	</flow>
