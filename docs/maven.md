@@ -43,4 +43,14 @@ Troubleshooting:
 - Register the local dependency in `.m2``
 - Validate the group Id, artifact, version and classifer
 
+Discussion:
+
+    Maven can force updates with `-U`
+    https://stackoverflow.com/questions/4856307/when-maven-says-resolution-will-not-be-reattempted-until-the-update-interval-of
+
+    Maven -U means force update of snapshot dependencies. Release dependencies can't be updated this way.
+    https://stackoverflow.com/questions/4701532/force-maven-update
+
+    Maven updatePolicy: This element specifies how often updates should attempt to occur. Maven will compare the local POM’s timestamp (stored in a repository’s maven-metadata file) to the remote. The choices are: always, daily (default), interval:X (where X is an integer in minutes) or never.
+    http://maven.apache.org/settings.html
 
