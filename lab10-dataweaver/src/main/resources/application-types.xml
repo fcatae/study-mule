@@ -99,4 +99,13 @@ type json_transactions_array = Array<{|  amount: String,   customerRef: String, 
       </types:output-event>
     </types:processor-declaration>
   </types:enrichment>
+  <types:enrichment select="#a8bcf3fd-8da4-49ac-9966-330491c8ec1d">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="json_transactions_array"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
 </types:mule>

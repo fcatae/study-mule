@@ -12,13 +12,11 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 	<flow name="lab10-codeFlow3" doc:id="e2a5e9e7-b569-4056-b813-f1eb951e2bfd" >
 		<http:listener doc:name="GET /join" doc:id="a2a8684b-6e2e-4655-9fdd-896330c08267" config-ref="mua-flights-api-httpListenerConfig" path="/join"/>
 		<flow-ref doc:name="Flow Reference" doc:id="474b2bea-c5f7-4995-897c-4fcd6451184b" name="lab10-flights"/>
-		<ee:transform doc:name="Transform Message" doc:id="84ff1129-fdc0-4461-a6db-13907ae536e4" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
+		<ee:transform doc:name="Fix Flights" doc:id="84ff1129-fdc0-4461-a6db-13907ae536e4">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
 output application/json
-fun formatDate(dt) = dt 
-		as Date {format: "MMMM d, yyyy"}
-		as String {format: "yyyy-MM-dd"}
+import formatDate from modules::convert
 ---
 payload map ({
 	code: upper($.airline ++ $.flightCode ++ formatDate($.departureDate)), 
@@ -29,20 +27,29 @@ payload map ({
 		</ee:transform>
 		<set-variable value="#[payload]" doc:name="SetFlights" doc:id="c53aae7a-d972-47c8-a7ac-26905f4abbc7" variableName="flights"/>
 		<flow-ref doc:name="Flow Reference" doc:id="507365a8-680c-4eea-ac02-06e173e698c9" name="lab10-transactions"/>
-		<ee:transform doc:name="Transform Message" doc:id="13932cdc-9366-4b73-9158-34bbbac3d133" >
+		<set-variable value="#[payload]" doc:name="SetTransactions" doc:id="8dbbc4da-348b-4628-9ea5-6f829537c390" variableName="transactions"/>
+		<ee:transform doc:name="Transform Message" doc:id="acbff1a2-fb55-4ff4-b1d1-298226f5457c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+vars.flights map {
+	airlineName: $.data.airline,
+	flightCode: $.data.flightCode,
+	departureDate: $.data.departureDate,
+	code: $.code,
+	transactions: vars.transactions[$.code] default []
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="7c5876b3-1d9a-4a9e-87c6-c6048484d6a1" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-//payload map ({ amount: $.amount as Number, flightID: $.flightID})
-//	orderBy $.amount
-payload groupBy $.flightID
-
-		
-]]></ee:set-payload>
+payload]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<set-variable value="#[payload]" doc:name="SetTransactions" doc:id="8dbbc4da-348b-4628-9ea5-6f829537c390" variableName="transactions"/>
 	</flow>
 	<flow name="lab10-transactions" doc:id="f9e2194f-3cfd-4c9a-9335-09a53e1e6f74" >
 		<http:listener doc:name="GET /transactions" doc:id="7d24b6eb-d3b5-4b1b-aa17-92774a4b9986" path="/transactions" config-ref="mua-flights-api-httpListenerConfig"/>
@@ -54,9 +61,9 @@ ns ns0 http://training.mulesoft.com/
 ---
 {
 	ns0#GetTransactionsforFlights: {
-		flightID: "UNITEDER38SD2015-03-20",
+		flightID: "UNITEDER38SD2016-03-20",
 		flightID: "ER0945",
-		flightID: "UNITEDER38SD2015-02-12"
+		flightID: "UNITEDER09452016-06-01"
 	}
 }]]></ee:set-payload>
 			</ee:message>
@@ -68,6 +75,19 @@ ns ns0 http://training.mulesoft.com/
 output application/json
 ---
 payload.body.GetTransactionsforFlightsResponse.*transaction]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="13932cdc-9366-4b73-9158-34bbbac3d133">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+//payload map ({ amount: $.amount as Number, flightID: $.flightID})
+//	orderBy $.amount
+payload groupBy $.flightID
+
+		
+]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 	</flow>
