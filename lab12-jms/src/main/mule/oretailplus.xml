@@ -7,6 +7,10 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/ftp http://www.mulesoft.org/schema/mule/ftp/current/mule-ftp.xsd
 http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<flow name="oretailplusFlow" doc:id="71999ce2-e99e-478e-ba52-5474a1a72a5f" >
+		<jms:listener doc:name="Listener" doc:id="786dc8f8-06ba-4c3d-8600-afc81df54b4a" config-ref="JMS_Config" destination="online"/>
+		<flow-ref doc:name="Flow Reference" doc:id="433154e9-d01a-4be8-a5eb-e420ecd12b96" name="oRetailPlus"/>
+	</flow>
 	<flow name="oRetailPlus" doc:id="0789aab5-3b72-4e63-bd91-a9cdfa50300f" >
 		<set-variable value="#[sizeOf(payload)]" doc:name="recordCount" doc:id="acc5d473-9022-43a5-9b74-d0d1b76b046b" variableName="recordCount"/>
 		<file:write doc:name="File" doc:id="2efff15d-4c9a-47b1-b2c7-10cf05f23090" path="#[ p('partner3.fileWrite') ++ '/MULEBANK-$(now() as Number)-$(vars.recordCount).csv']">

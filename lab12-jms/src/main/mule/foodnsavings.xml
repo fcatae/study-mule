@@ -5,10 +5,16 @@
 	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<flow name="foodnsavingsFlow" doc:id="96415330-4361-454b-9cef-a044bf634a6a" >
+		<jms:listener doc:name="Listener" doc:id="2579c13b-8ef1-45e5-b8f4-756aacbc493c" config-ref="JMS_Config" destination="food"/>
+		<logger level="INFO" doc:name="Logger" doc:id="6b46827d-e124-400f-81ca-3ae2cbe2a2d9" message='RECEIVED: #[payload]'/>
+		<flow-ref doc:name="Flow Reference" doc:id="0cd6ff25-3f43-4840-931a-449bf4b57fd9" name="foodNSavings"/>
+	</flow>
 	<flow name="foodNSavings" doc:id="1bf0e897-9e60-44da-a5b9-b0f4d2d03131" >
 		<db:bulk-insert doc:name="Database" doc:id="08a21e8f-890b-4a5e-90a8-c18d9e840101" config-ref="Partner1_Database_Configuration">
 			<db:sql >INSERT INTO Giftcards (number, sourceID, balance, createdOn) VALUES
 (:number, :sourceID, :balance, :createdOn)</db:sql>
 		</db:bulk-insert>
+		<logger level="INFO" doc:name="Logger" doc:id="0a546f3e-d45e-4cd0-9693-e4232831f75d" />
 	</flow>
 </mule>

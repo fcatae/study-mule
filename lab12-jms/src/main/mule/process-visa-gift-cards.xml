@@ -8,7 +8,7 @@ http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/fil
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd">
 	<flow name="processVisaGiftCards" doc:id="71f8e1da-6433-462b-a48a-97c8fabbb8ce" >
-		<file:listener doc:name="On New File" doc:id="66132e0a-ff31-40ec-b04a-33f3f7e7eafb" directory="${master.fileIn}" moveToDirectory="${master.fileProcessed}" outputMimeType="application/csv">
+		<file:listener doc:name="On New File" doc:id="66132e0a-ff31-40ec-b04a-33f3f7e7eafb" directory="${master.fileIn}" moveToDirectory="${master.fileProcessed}" outputMimeType="application/csv" renameTo='#[attributes.fileName ++ "-" ++ (now() as Number)]'>
 			<scheduling-strategy >
 				<fixed-frequency frequency="${master.pollFrequency}" />
 			</scheduling-strategy>
@@ -40,7 +40,7 @@ payload map ((giftcard) -> {
 )]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
-				<flow-ref doc:name="foodNSavings" doc:id="c24709ce-2dfa-47a8-b21f-1d819b0613fd" name="foodNSavings"/>
+				<flow-ref doc:name="foodNSavings" doc:id="c24709ce-2dfa-47a8-b21f-1d819b0613fd" name="jmsFoodsNSavings"/>
 			</when>
 			<when expression="#[vars.partner == p('partner2.name')]" >
 				<set-variable value="#[now()]" doc:name="creationDate" doc:id="957f7035-154d-42f8-8b63-d2a9b319dd06" variableName="creationDate"/>
@@ -61,7 +61,7 @@ payload map ((giftcard) ->
 					</ee:message>
 				</ee:transform>
 				<set-variable value="#[vars.creationDate as Number]" doc:name="creationDateUnixEpoch" doc:id="4f2fc09a-b76d-4251-9bd3-0fb487e5c091" variableName="creationDateUnixEpoch"/>
-				<flow-ref doc:name="mealnGo" doc:id="ea520531-8427-490e-af7b-14b8ef96b86a" name="mealnGo"/>
+				<flow-ref doc:name="mealnGo" doc:id="ea520531-8427-490e-af7b-14b8ef96b86a" name="jmsMealsNGo"/>
 			</when>
 			<when expression="#[vars.partner == p('partner3.name')]" >
 				<ee:transform doc:name="Partner 3 Transform" doc:id="c9091377-6849-4108-b17c-a81945ae1c36" >
@@ -78,7 +78,7 @@ payload map ((giftcard) ->
 )]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
-				<flow-ref doc:name="oRetailPlus" doc:id="b98a43c2-a1a8-46f1-b6d1-ddfb142f6617" name="oRetailPlus"/>
+				<flow-ref doc:name="oRetailPlus" doc:id="b98a43c2-a1a8-46f1-b6d1-ddfb142f6617" name="jmsOnlineRetail"/>
 			</when>
 			<otherwise >
 				<logger level="INFO" doc:name="Logger" doc:id="47583d3e-7235-42fa-9e30-f64560e95a97" message='#["Unsupported partner found in file: " ++ attributes.fileName]'/>
@@ -92,4 +92,36 @@ payload map ((giftcard) ->
 			</on-error-propagate>
 		</error-handler>
 	</flow>
+	<sub-flow name="jmsFoodsNSavings" doc:id="3151e107-944a-49d9-bf60-ab5e7976024c" >
+		<logger level="INFO" doc:name="Logger" doc:id="ad1a103e-4fde-49d4-9738-9611e703a174" message="FOOD FILE #[ attributes.fileName ]"/>
+		<jms:publish doc:name="queue: food" doc:id="96ee453f-eb24-4667-b9e1-92022c20488c" config-ref="JMS_Config" destination="food">
+			<jms:message >
+				<jms:body ><![CDATA[#[output application/json --- payload]]]></jms:body>
+			</jms:message>
+		</jms:publish>
+	</sub-flow>
+	<sub-flow name="jmsMealsNGo" doc:id="c2de94d3-ce92-42e0-aa23-78c9b4d246ec" >
+		<logger level="INFO" doc:name="Logger" doc:id="4af2f68b-7dff-4c22-9fad-ebcde5c8ae78" message="MEALS FILE #[ attributes.fileName ]"/>
+		<ee:transform doc:name="Transform Message" doc:id="aaa2a08b-ba4b-46b5-b27d-005e0bd4ddbe" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<jms:publish doc:name="queue: meals" doc:id="0edfbd93-274c-4734-aff6-34ba1b5c267b" config-ref="JMS_Config" destination="meals"/>
+	</sub-flow>
+	<sub-flow name="jmsOnlineRetail" doc:id="512f8d39-560e-4921-a144-3b382811f27b" >
+		<logger level="INFO" doc:name="Logger" doc:id="4735d6ea-53dd-49f8-9499-4f9671d1ec1e" message="ONLINE FILE #[ attributes.fileName ]"/>
+		<ee:transform doc:name="Transform Message" doc:id="9be25e9b-9e55-4007-80da-fe7f592ea510" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<jms:publish doc:name="queue: online" doc:id="b935acb5-89ff-4e7c-9d25-ace98ca835d1" config-ref="JMS_Config" destination="online"/>
+	</sub-flow>
 </mule>

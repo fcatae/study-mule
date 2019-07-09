@@ -1,14 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:db="http://www.mulesoft.org/schema/mule/db"
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns:db="http://www.mulesoft.org/schema/mule/db"
 	xmlns:ftp="http://www.mulesoft.org/schema/mule/ftp"
-	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd 
-http://www.mulesoft.org/schema/mule/ftp http://www.mulesoft.org/schema/mule/ftp/current/mule-ftp.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
-	
-		<flow name="testFTP" doc:id="0ff551ad-5177-4157-970c-12537054233e" initialState="stopped">
+http://www.mulesoft.org/schema/mule/ftp http://www.mulesoft.org/schema/mule/ftp/current/mule-ftp.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<jms:config name="JMS_Config" doc:name="JMS Config" doc:id="143e79cc-3de6-4110-ae6f-f52c8a2bda9d" >
+		<jms:active-mq-connection />
+	</jms:config>
+	<flow name="testJMS" doc:id="9f97f6cc-a88b-4ac3-994b-e303a3ae75e2" >
+		<jms:listener doc:name="Listener" doc:id="5035090d-00d1-4839-a7a2-1735fa3ac700" config-ref="JMS_Config" destination="testq"/>
+		<logger level="INFO" doc:name="Logger" doc:id="0672a4ca-fa76-4a93-bf88-8a6a39dbe8c7" />
+	</flow>
+	<flow name="testFlow" doc:id="88c2308f-804b-4ede-9726-a99a87e52c8d" >
+		<http:listener doc:name="POST /jms" doc:id="7e893013-2c83-4dfc-9779-73f24c1e09d4" config-ref="HTTP_Listener_config" path="/jms"/>
+		<ee:transform doc:name="Transform Message" doc:id="56a32b3b-69c9-4399-b803-e1e174134990" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<jms:publish doc:name="Publish" doc:id="2c2ead26-dc26-4c56-88a1-87abfcb55aee" config-ref="JMS_Config" destination="testq"/>
+		<ee:transform doc:name="Transform Message" doc:id="f11251ff-cb04-4c4f-a8ff-821251c93555" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="testFTP" doc:id="0ff551ad-5177-4157-970c-12537054233e" initialState="stopped">
 		<scheduler doc:name="Scheduler" doc:id="12f24a5a-e3f6-4043-9797-d19fdfecc5af" >
 			<scheduling-strategy >
 				<fixed-frequency frequency="60" timeUnit="SECONDS"/>
