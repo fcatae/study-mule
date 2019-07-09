@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="03894428-2bb3-4f76-a6e8-c62857555a40" >
+		<db:my-sql-connection host="mudb.learn.mulesoft.com" port="3306" user="mule" password="mule" database="training" />
+	</db:config>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="d5e12487-cb5e-44d0-bed2-d85fd78dca9f" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="lab13-batchFlow" doc:id="71b4e0dc-6e92-4975-ad52-b332f0491fe2" >
+		<http:listener doc:name="POST /run" doc:id="09d88642-0620-4f2b-b752-7c3ee704f857" path="/run" config-ref="HTTP_Listener_config"/>
+		<db:select doc:name="Select" doc:id="b66b818c-ea8b-424b-82be-0d7ef3516b58" config-ref="Database_Config">
+			<db:sql >SELECT * FROM flights_transactions LIMIT 5</db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="1f3c9d62-f846-4f65-81ac-6e6f61036076" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
