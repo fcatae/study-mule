@@ -102,15 +102,12 @@ payload map ((giftcard) ->
 	</sub-flow>
 	<sub-flow name="jmsMealsNGo" doc:id="c2de94d3-ce92-42e0-aa23-78c9b4d246ec" >
 		<logger level="INFO" doc:name="Logger" doc:id="4af2f68b-7dff-4c22-9fad-ebcde5c8ae78" message="MEALS FILE #[ attributes.fileName ]"/>
-		<ee:transform doc:name="Transform Message" doc:id="aaa2a08b-ba4b-46b5-b27d-005e0bd4ddbe" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/java
----
-payload]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<jms:publish doc:name="queue: meals" doc:id="0edfbd93-274c-4734-aff6-34ba1b5c267b" config-ref="JMS_Config" destination="meals"/>
+		<jms:publish doc:name="queue: meals" doc:id="0edfbd93-274c-4734-aff6-34ba1b5c267b" config-ref="JMS_Config" destination="meals">
+			<jms:message >
+				<jms:body ><![CDATA[#[output application/json --- payload]]]></jms:body>
+				<jms:properties ><![CDATA[#[{"creationDateUnixEpoch": vars.creationDateUnixEpoch }]]]></jms:properties>
+			</jms:message>
+		</jms:publish>
 	</sub-flow>
 	<sub-flow name="jmsOnlineRetail" doc:id="512f8d39-560e-4921-a144-3b382811f27b" >
 		<logger level="INFO" doc:name="Logger" doc:id="4735d6ea-53dd-49f8-9499-4f9671d1ec1e" message="ONLINE FILE #[ attributes.fileName ]"/>

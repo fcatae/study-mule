@@ -8,6 +8,8 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 http://www.mulesoft.org/schema/mule/ftp http://www.mulesoft.org/schema/mule/ftp/current/mule-ftp.xsd">
 	<flow name="mealngoFlow" doc:id="78d9d83c-c9f7-48d9-91f2-e5ddf27b59da" >
 		<jms:listener doc:name="Listener" doc:id="656aa3a3-0e34-4bf2-b313-8cf342ad16c2" config-ref="JMS_Config" destination="meals"/>
+		<set-variable value="#[attributes.properties.userProperties.creationDateUnixEpoch as String]" doc:name="SetCreationDateUnixEpoch" doc:id="c5a43bd2-4d91-40d7-884d-12f5037d5ad1" variableName="creationDateUnixEpoch"/>
+		<logger level="INFO" doc:name="Logger" doc:id="353f68ef-4559-46a6-a8d4-6b2bd3e97ad1" message="VARS: #[vars]" />
 		<flow-ref doc:name="Flow Reference" doc:id="d7d7b753-dbf6-4147-a4e8-941a9f9f83a2" name="mealnGo"/>
 	</flow>
 	<flow name="mealnGo" doc:id="980f7f47-e6e9-493e-a9ca-2946d7082d2c" >
