@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<wsc:config name="Transaction_Web_Service_Consumer_Config" doc:name="Web Service Consumer Config" doc:id="056926ef-8e2b-4902-ba80-518712b7bea2" >
+		<wsc:connection wsdlLocation="http://apdev-accounts-ws.cloudhub.io/api/transactions?wsdl" service="TransactionServiceService" port="TransactionServicePort" address="http://apdev-accounts-ws.cloudhub.io/api/transactions"/>
+	</wsc:config>
+	<flow name="lab10-codeFlow" doc:id="f9e2194f-3cfd-4c9a-9335-09a53e1e6f74" >
+		<http:listener doc:name="GET /transactions" doc:id="7d24b6eb-d3b5-4b1b-aa17-92774a4b9986" path="/transactions" config-ref="mua-flights-api-httpListenerConfig"/>
+		<ee:transform doc:name="Transform Message" doc:id="a4901d04-51ed-46b2-9ba7-7b61903b798f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://training.mulesoft.com/
+---
+{
+	ns0#GetTransactionsforFlights: {
+		flightID: "UNITEDER38SD2015-03-20",
+		flightID: "UNITEDER38SD2015-09-11",
+		flightID: "UNITEDER38SD2015-02-12"
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<wsc:consume doc:name="Transaction Web Service" doc:id="8a35524d-fdb7-4224-9c75-1cf3d6daee9f" config-ref="Transaction_Web_Service_Consumer_Config" operation="GetTransactionsforFlights"/>
+	</flow>
+</mule>

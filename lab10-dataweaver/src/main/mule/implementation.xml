@@ -84,7 +84,7 @@ flights:
 	</sub-flow>
 	<flow name="getUnitedFlightsFlow" doc:id="23bd745e-9d0a-4b7d-9df6-11e74c6cdab2" >
 		<http:request method="GET" doc:name="United REST Request" doc:id="c5c25b07-8ed8-49cd-989d-eb26cbde11df" config-ref="United_REST_Request_configuration" path="/essentials/united/flights/{destination}" outputMimeType="application/json">
-			<http:uri-params><![CDATA[#[output applicaton/java
+			<http:uri-params><![CDATA[#[output application/java
 ---
 {
 	"destination" : vars.code
