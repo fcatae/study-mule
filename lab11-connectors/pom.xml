@@ -35,16 +35,16 @@
                             <artifactId>spring-context</artifactId>
                         </sharedLibrary>
                     <sharedLibrary>
-                            <groupId>org.springframework.security</groupId>
-                            <artifactId>spring-security-core</artifactId>
-                        </sharedLibrary>
-                    <sharedLibrary>
                     		<groupId>com.mulesoft.training</groupId>
     						<artifactId>mock-servers</artifactId>
                     	</sharedLibrary>
                     <sharedLibrary>
                         	<groupId>org.apache.derby</groupId>
         				    <artifactId>derby</artifactId>
+                        </sharedLibrary>
+                    <sharedLibrary>
+                            <groupId>org.springframework.security</groupId>
+                            <artifactId>spring-security-core</artifactId>
                         </sharedLibrary>
                     </sharedLibraries>
                 <classifier>mule-application</classifier>
@@ -70,6 +70,7 @@
 			<groupId>com.mulesoft.training</groupId>
     		<artifactId>mock-servers</artifactId>
     		<version>1.1.0</version>
+    		<classifier>-servers</classifier>
 		</dependency>
 		<dependency>
             <groupId>org.mule.modules</groupId>
@@ -88,11 +89,6 @@
             <version>4.1.9.RELEASE</version>
         </dependency>
     	<dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-core</artifactId>
-            <version>4.0.4.RELEASE</version>
-        </dependency>
-    	<dependency>
             <groupId>org.mule.connectors</groupId>
             <artifactId>mule-db-connector</artifactId>
             <version>1.2.0</version>
@@ -108,6 +104,11 @@
             <artifactId>mule-ftp-connector</artifactId>
             <version>1.1.0</version>
             <classifier>mule-plugin</classifier>
+        </dependency>
+    	<dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-core</artifactId>
+            <version>4.0.4.RELEASE</version>
         </dependency>
     </dependencies>
 
