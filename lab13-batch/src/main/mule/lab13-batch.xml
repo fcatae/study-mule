@@ -21,7 +21,7 @@ http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/ba
 	</vm:config>
 	<flow name="lab13-batchFlow1" doc:id="f988f7e2-84f6-41b9-bd84-3e4a29b3f849" >
 		<http:listener doc:name="POST /batch" doc:id="cbdde003-082e-4a03-bbf0-cf10320df299" config-ref="HTTP_Listener_config" path="/batch"/>
-		<batch:job jobName="batch_process" doc:id="9b31e18f-8723-401f-8524-6487ceb8c4c1" >
+		<batch:job jobName="batch_process" doc:id="9b31e18f-8723-401f-8524-6487ceb8c4c1" maxFailedRecords="-1" maxConcurrency="10" blockSize="5">
 			<batch:process-records >
 				<batch:step name="step_parallel_validation" doc:id="a7d7239f-a132-4d7e-8283-4c9bd46fb931" >
 					<ee:transform doc:name="Transform Message" doc:id="5fcd9096-717f-4ac7-a424-e63f5c80420f" >
@@ -34,6 +34,8 @@ output application/java
 }]]></ee:set-payload>
 						</ee:message>
 					</ee:transform>
+					<set-variable value="#[payload]" doc:name="Set Variable" doc:id="eae3fe6f-78fc-42d6-8598-b65942d64db6" variableName="tmp"/>
+					<flow-ref doc:name="Raise Random Error" doc:id="a848b981-5138-4b57-8b2e-7b9d3b12220e" name="raise_random_error"/>
 					<vm:publish-consume queueName="approval" doc:name="Validate Approval" doc:id="33458767-5772-4ae8-894d-f4331c0771b9" config-ref="VM_Config" target="validation"/>
 				</batch:step>
 				<batch:step name="step_file_logger" doc:id="6d32a3a6-e385-47b0-9943-a51e0edf4600" acceptExpression="#[ vars.validation == true ]">
@@ -41,8 +43,37 @@ output application/java
 						<logger level="INFO" doc:name="Logger" doc:id="7e6a4255-b0fb-43f8-a112-0c9fbe6d185e" message="CRITICAL PAYLOAD #[payload]"/>
 					</batch:aggregator>
 				</batch:step>
+				<batch:step name="Batch_Step" doc:id="ed41c0a0-7ef3-4cea-8f46-260f0f09f3e9" acceptPolicy="ONLY_FAILURES">
+					<logger level="INFO" doc:name="Logger" doc:id="6df53e5a-159b-4d9e-9085-6b0b0e2ce246" message="LOGGING ERRORS LOGGING ERRORS #[vars.tmp]"/>
+				</batch:step>
 			</batch:process-records>
+			<batch:on-complete >
+				<logger level="INFO" doc:name="Logger" doc:id="720f134a-357e-4413-ae7f-5f6b557b9d0c" message="COMPLETEEEEEEEEEEEE"/>
+				<ee:transform doc:name="Transform Message" doc:id="f8907dd5-1ed1-4f40-9ff4-82829f0b1ad7" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	batch: payload.batchJobInstanceId,
+	data: payload
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<logger level="INFO" doc:name="Logger" doc:id="d0eed455-40a9-46ee-890e-afd0af0f54d4" message="ON: #[payload]"/>
+			</batch:on-complete>
 		</batch:job>
+		<ee:transform doc:name="Transform Message" doc:id="5bdd9b45-26f4-4843-bb33-0f20a96ac847" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: "complete",
+	data: payload
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
 	</flow>
 	<flow name="lab13-batchFlow" doc:id="71b4e0dc-6e92-4975-ad52-b332f0491fe2" >
 		<http:listener doc:name="POST /run" doc:id="09d88642-0620-4f2b-b752-7c3ee704f857" path="/run" config-ref="HTTP_Listener_config"/>
@@ -60,6 +91,26 @@ payload]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 	</flow>
+	<sub-flow name="raise_random_error" doc:id="a22507f2-ee1a-4732-9052-521d588c7cac" >
+		<choice doc:name="Choice" doc:id="5afcc377-4340-4846-b942-086f3ce1d5c6" >
+			<when expression="#[(payload.transactionId mod 5) == 0]">
+				<raise-error doc:name="Raise error" doc:id="c51f8093-d9af-4cc7-85a4-9380936f4ad4" type="RANDOM:MOD5_ERROR" description="random error raised when number is divisible by 5"/>
+			</when>
+			<when expression="#[payload.transactionId == 6]">
+				<logger level="INFO" doc:name="Logger" doc:id="7377bc67-6b0f-46e4-ba14-cfd42f107b78" message="SLEEP START"/>
+				<ee:transform doc:name="Transform Message" doc:id="05d80b33-b2e4-408e-9fcb-246a4986fc4e">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+import wait from dw::Runtime
+---
+payload wait 30000]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<logger level="INFO" doc:name="Logger" doc:id="f8c62e5f-4d9f-4de5-9d6c-d73706144aa0" message="SLEEP END"/>
+			</when>
+		</choice>
+	</sub-flow>
 	<flow name="flow_approval_process" doc:id="c64d02cd-5f37-4c43-94af-4c6378c6f70a" >
 		<vm:listener doc:name="Queue Compliance" doc:id="157e738a-28ac-48c1-8625-abfada0e6e96" config-ref="VM_Config" queueName="approval"/>
 		<ee:transform doc:name="Transform Message" doc:id="543b8629-86a4-4846-992d-971cb4a9811d" >
@@ -77,6 +128,7 @@ output application/java
 ]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="14d5928a-fb24-4b52-bbb3-ea3c6e2d5fe1" />
 		<ee:transform doc:name="Transform Message" doc:id="69ce6623-c13f-4438-adbc-af9518c1680e" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
