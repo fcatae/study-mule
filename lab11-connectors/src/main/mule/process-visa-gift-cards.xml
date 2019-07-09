@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:file="http://www.mulesoft.org/schema/mule/file"
-	xmlns="http://www.mulesoft.org/schema/mule/core"
-	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
-http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
 	<file:config name="Visa_File_Config" doc:name="File Config" doc:id="110ceb79-506d-432a-a71b-21b00ae500b1" >
 		<file:connection workingDir="${fabricio.visa}" />
 	</file:config>
@@ -15,24 +16,28 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 			</scheduling-strategy>
 			<file:matcher filenamePattern="*.csv" />
 		</file:listener>
-		<logger level="INFO" doc:name="Logger" doc:id="27a5d1ba-a6ed-4974-81a4-69e0fead4dae" message='LOG1: #[ write(payload,"application/json")]'/>
-		<ee:transform doc:name="Transform Message" doc:id="1d2665f8-8e93-4b56-ba52-cd9b825f9485" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
+		<foreach doc:name="For Each" doc:id="bbba319f-9137-4b77-b6d8-017ecec17fcb" >
+			<ee:transform doc:name="Transform Message" doc:id="43f8ef79-9a5e-4722-9a28-7626f91b3c9d" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
 ---
-{
-	payload: payload,
-	attributes: attributes	
-}
-]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<logger level="INFO" doc:name="Logger" doc:id="3425832f-c4bf-4818-bbce-5544eb977a5e" message="PROCESSED2 FILE #[payload]"/>
-		<error-handler >
-			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="26158253-8a37-4fc1-a9c7-05c99231501b" >
-				<logger level="INFO" doc:name="Logger" doc:id="2e937c7a-9b50-4322-9310-a1c27c7321cc" message="EXCEPTION #[ error ]"/>
-			</on-error-propagate>
-		</error-handler>
+payload[0]]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<logger level="INFO" doc:name="Logger" doc:id="7625568b-ef1f-4bf9-8106-0094f68d57ef" message='#["payload: " ++ write(payload, "application/json")]'/>
+			<choice doc:name="Choice" doc:id="3bc16a71-743c-4dc2-ba01-de393d249066" >
+				<when expression='#[payload.partner == "Food and Savings"]'>
+					<flow-ref doc:name="Ref Food N Savings" doc:id="fdefe230-f430-46eb-a5f2-a93ea4415be7" name="subflow_Food_N_Savings"/>
+				</when>
+				<otherwise >
+					<logger level="INFO" doc:name="Copy_of_Logger" doc:id="1f22c5f4-c5e4-4371-924f-9156203326be" message='UNPROCESSED #[ payload.partner ]' />
+				</otherwise>
+			</choice>
+		</foreach>
+	</flow>
+	<flow name="subflow_Food_N_Savings" doc:id="5180f1cf-858d-4e91-9c16-2dc93aa7d951" >
+		<logger level="INFO" doc:name="Logger" doc:id="3425832f-c4bf-4818-bbce-5544eb977a5e" message='#["\n PROCESSED2 FILE\n"] #[payload]' />
+		<flow-ref doc:name="REF foodnsavings Flow" doc:id="72d9ce49-bf2c-42eb-89c5-29d7758e8064" name="external_foodnsavings_insert"/>
 	</flow>
 </mule>

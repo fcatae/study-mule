@@ -6,7 +6,7 @@
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-	<flow name="foodnsavingsFlow1" doc:id="6e95827a-181c-4e75-8291-580a7a2c69a2" >
+	<flow name="external_foodnsavings_insert" doc:id="6e95827a-181c-4e75-8291-580a7a2c69a2" >
 		<http:listener doc:name="POST /food" doc:id="7984042f-b041-4151-9f55-183ae9b5d4b7" config-ref="HTTP_Listener_config" path="/food" allowedMethods="POST"/>
 		<ee:transform doc:name="Transform Message" doc:id="114081d1-8c45-4956-8221-a0dc26ab0967" >
 			<ee:message >
