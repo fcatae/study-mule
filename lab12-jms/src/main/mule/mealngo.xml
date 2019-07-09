@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ftp="http://www.mulesoft.org/schema/mule/ftp" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/ftp http://www.mulesoft.org/schema/mule/ftp/current/mule-ftp.xsd">
+	<flow name="mealnGo" doc:id="980f7f47-e6e9-493e-a9ca-2946d7082d2c" >
+		<ftp:write doc:name="FTP" doc:id="bf44d5d6-0a06-4704-bed8-6c425d2a797f" config-ref="Partner2_FTP_Config" path="#['MULEBANK-gc-' ++ vars.creationDateUnixEpoch ++ '.csv']">
+			<ftp:content ><![CDATA[#[output application/csv --- payload]]]></ftp:content>
+		</ftp:write>
+	</flow>
+</mule>

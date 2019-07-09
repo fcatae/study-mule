@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ftp="http://www.mulesoft.org/schema/mule/ftp"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/ftp http://www.mulesoft.org/schema/mule/ftp/current/mule-ftp.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<flow name="oRetailPlus" doc:id="0789aab5-3b72-4e63-bd91-a9cdfa50300f" >
+		<set-variable value="#[sizeOf(payload)]" doc:name="recordCount" doc:id="acc5d473-9022-43a5-9b74-d0d1b76b046b" variableName="recordCount"/>
+		<file:write doc:name="File" doc:id="2efff15d-4c9a-47b1-b2c7-10cf05f23090" path="#[ p('partner3.fileWrite') ++ '/MULEBANK-$(now() as Number)-$(vars.recordCount).csv']">
+			<file:content ><![CDATA[#[output application/csv --- payload]]]></file:content>
+		</file:write>
+	</flow>
+</mule>

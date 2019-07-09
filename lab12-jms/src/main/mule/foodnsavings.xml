@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<flow name="foodNSavings" doc:id="1bf0e897-9e60-44da-a5b9-b0f4d2d03131" >
+		<db:bulk-insert doc:name="Database" doc:id="08a21e8f-890b-4a5e-90a8-c18d9e840101" config-ref="Partner1_Database_Configuration">
+			<db:sql >INSERT INTO Giftcards (number, sourceID, balance, createdOn) VALUES
+(:number, :sourceID, :balance, :createdOn)</db:sql>
+		</db:bulk-insert>
+	</flow>
+</mule>

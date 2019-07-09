@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:ftp="http://www.mulesoft.org/schema/mule/ftp" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ftp http://www.mulesoft.org/schema/mule/ftp/current/mule-ftp.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd">
+	<flow name="processVisaGiftCards" doc:id="71f8e1da-6433-462b-a48a-97c8fabbb8ce" >
+		<file:listener doc:name="On New File" doc:id="66132e0a-ff31-40ec-b04a-33f3f7e7eafb" directory="${master.fileIn}" moveToDirectory="${master.fileProcessed}" outputMimeType="application/csv">
+			<scheduling-strategy >
+				<fixed-frequency frequency="${master.pollFrequency}" />
+			</scheduling-strategy>
+			<file:matcher filenamePattern="*.csv" />
+		</file:listener>
+		<ee:transform doc:name="Transform Message" doc:id="5e88ed17-9d48-42b7-8f39-9d17aee81859" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[sizeOf(payload)]" doc:name="recordCount" doc:id="e152a30d-1a53-418f-84de-189943dcc490" variableName="recordCount"/>
+		<set-variable value="#[payload[0].partner]" doc:name="partner" doc:id="13bbaeb0-e5d6-408f-98c4-a0f25e56aa12" variableName="partner"/>
+		<choice doc:name="Choice" doc:id="ccfedb14-1c2e-4c4c-b3b1-8e016c10b156" >
+			<when expression="#[vars.partner == p('partner1.name')]" >
+				<ee:transform doc:name="Partner 1 Transform" doc:id="158c3080-5be6-4072-91e6-40bf1fbd07bd" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ((giftcard) -> {
+	balance: giftcard.amount_granted,
+	createdOn: now() as String {format: "yyyy-MM-dd HH:mm:ss"},
+	number: giftcard.card_no,
+	sourceID: "MULEBANK-0949"
+}	
+)]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<flow-ref doc:name="foodNSavings" doc:id="c24709ce-2dfa-47a8-b21f-1d819b0613fd" name="foodNSavings"/>
+			</when>
+			<when expression="#[vars.partner == p('partner2.name')]" >
+				<set-variable value="#[now()]" doc:name="creationDate" doc:id="957f7035-154d-42f8-8b63-d2a9b319dd06" variableName="creationDate"/>
+				<ee:transform doc:name="Partner 2 Transform" doc:id="9399e0ee-768f-422d-8074-d63368237bf5" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ((giftcard) ->
+	{
+      gc_balance: giftcard.amount_granted,
+	  gc_card_number: giftcard.card_no,
+	  origin: "MULEBANK-0949",
+	  card_type: "VISA",
+	  expiration: (vars.creationDate + |P3M|) as Number
+	}
+)]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-variable value="#[vars.creationDate as Number]" doc:name="creationDateUnixEpoch" doc:id="4f2fc09a-b76d-4251-9bd3-0fb487e5c091" variableName="creationDateUnixEpoch"/>
+				<flow-ref doc:name="mealnGo" doc:id="ea520531-8427-490e-af7b-14b8ef96b86a" name="mealnGo"/>
+			</when>
+			<when expression="#[vars.partner == p('partner3.name')]" >
+				<ee:transform doc:name="Partner 3 Transform" doc:id="c9091377-6849-4108-b17c-a81945ae1c36" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ((giftcard) ->
+	{
+		cardNo: giftcard.card_no,
+		amount: giftcard.amount_granted,
+		bankOriginationID: "MULEBANK-0949"			
+	}
+)]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<flow-ref doc:name="oRetailPlus" doc:id="b98a43c2-a1a8-46f1-b6d1-ddfb142f6617" name="oRetailPlus"/>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Logger" doc:id="47583d3e-7235-42fa-9e30-f64560e95a97" message='#["Unsupported partner found in file: " ++ attributes.fileName]'/>
+				<set-payload value='#[output text/plain --- "Partner: " ++ vars.partner ++ ".  Not transferring the file."]' doc:name="Set Payload" doc:id="ab1b5e4f-a897-4dc7-b485-9eccfeab3ccd" />
+				<file:write doc:name="Write" doc:id="bdc41eb6-8a01-4ee7-8217-4b6fb2791644" path="#[p('master.fileWrite') ++ '/' ++ attributes.fileName ++ '-report.txt']"/>
+			</otherwise>
+		</choice>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="2ffde374-bd5e-46e6-9331-6c36f7b7f9ae" type="EXPRESSION">
+				<logger level="ERROR" doc:name="Logger" doc:id="8bf0d48a-0c5f-47a8-98be-a9e9e0c5b94c" message='#["Error transforming payload: " ++ write(error,"application/json")]'/>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+</mule>
