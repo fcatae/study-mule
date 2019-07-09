@@ -88,12 +88,6 @@
             <artifactId>spring-context</artifactId>
             <version>4.1.9.RELEASE</version>
         </dependency>
-    	<dependency>
-            <groupId>org.mule.connectors</groupId>
-            <artifactId>mule-db-connector</artifactId>
-            <version>1.2.0</version>
-            <classifier>mule-plugin</classifier>
-        </dependency>
         <dependency>
             <groupId>org.apache.derby</groupId>
             <artifactId>derby</artifactId>
@@ -114,6 +108,12 @@
             <groupId>org.mule.connectors</groupId>
             <artifactId>mule-file-connector</artifactId>
             <version>1.2.2</version>
+            <classifier>mule-plugin</classifier>
+        </dependency>
+    	<dependency>
+            <groupId>org.mule.connectors</groupId>
+            <artifactId>mule-db-connector</artifactId>
+            <version>1.5.0</version>
             <classifier>mule-plugin</classifier>
         </dependency>
     </dependencies>
