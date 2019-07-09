@@ -32,5 +32,15 @@ and deallocate the resources.
 The most common way to set up packaging for your project is via `<packaging>`. When the
 packaging is defined, plugin goals are automatically assigned to build phases.
 
+# Errors #
+
+Failure:
+
+    Caused by: org.eclipse.aether.transfer.ArtifactNotFoundException: Failure to find com.mulesoft.training:mock-servers:jar:1.1.0 in https://maven.anypoint.mulesoft.com/api/v1/maven was cached in the local repository, resolution will not be reattempted until the update interval of anypoint-exchange has elapsed or updates are forced
+
+Troubleshooting:
+- Check `pom.xml` file and dependencies
+- Register the local dependency in `.m2``
+- Validate the group Id, artifact, version and classifer
 
 
