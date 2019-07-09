@@ -33,6 +33,9 @@ payload[0]]]></ee:set-payload>
 				<when expression='#[payload.partner == "Meals n Go"]'>
 					<flow-ref doc:name="Flow Reference" doc:id="2ad81eff-bef3-4eb5-9b83-b99a01fa2a62" name="subflow_Meals_N_Go"/>
 				</when>
+				<when expression='#[payload.partner == "Online Retail"]'>
+					<flow-ref doc:name="Flow Reference" doc:id="4de96d10-9e6a-4e8a-ae26-06c950b9ec03" name="subflow_Online_Retail_Plus"/>
+				</when>
 				<otherwise >
 					<logger level="INFO" doc:name="Copy_of_Logger" doc:id="1f22c5f4-c5e4-4371-924f-9156203326be" message='UNPROCESSED #[ payload.partner ]' />
 				</otherwise>
@@ -46,5 +49,9 @@ payload[0]]]></ee:set-payload>
 	<sub-flow name="subflow_Meals_N_Go" doc:id="423be566-7821-4b8d-ac22-76a8fff7fa35" >
 		<logger level="INFO" doc:name="Logger" doc:id="ab0b0bb9-bf6f-4c90-a9f3-4846d388bfe7" message='#["\n PROCESSED FILE\n"] #[payload]' />
 		<flow-ref doc:name="Flow Reference" doc:id="e77c030d-7a09-480e-830a-631e5039a561" name="external_meals"/>
+	</sub-flow>
+	<sub-flow name="subflow_Online_Retail_Plus" doc:id="8843566a-cab6-49f2-af09-92289346c49a" >
+		<logger level="INFO" doc:name="Logger" doc:id="ff359764-a6e6-438f-8c8d-b82a7c5d7722" message='#["\n PROCESSED FILE\n"] #[payload]' />
+		<flow-ref doc:name="REF online" doc:id="ca3b94e6-3e0a-4eb2-8b20-6801b4599c6f" name="external_oretailplus"/>
 	</sub-flow>
 </mule>
