@@ -9,7 +9,42 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 	<wsc:config name="Transaction_Web_Service_Consumer_Config" doc:name="Web Service Consumer Config" doc:id="056926ef-8e2b-4902-ba80-518712b7bea2" >
 		<wsc:connection wsdlLocation="http://apdev-accounts-ws.cloudhub.io/api/transactions?wsdl" service="TransactionServiceService" port="TransactionServicePort" address="http://apdev-accounts-ws.cloudhub.io/api/transactions"/>
 	</wsc:config>
-	<flow name="lab10-codeFlow" doc:id="f9e2194f-3cfd-4c9a-9335-09a53e1e6f74" >
+	<flow name="lab10-codeFlow3" doc:id="e2a5e9e7-b569-4056-b813-f1eb951e2bfd" >
+		<http:listener doc:name="GET /join" doc:id="a2a8684b-6e2e-4655-9fdd-896330c08267" config-ref="mua-flights-api-httpListenerConfig" path="/join"/>
+		<flow-ref doc:name="Flow Reference" doc:id="474b2bea-c5f7-4995-897c-4fcd6451184b" name="lab10-flights"/>
+		<ee:transform doc:name="Transform Message" doc:id="84ff1129-fdc0-4461-a6db-13907ae536e4" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+fun formatDate(dt) = dt 
+		as Date {format: "MMMM d, yyyy"}
+		as String {format: "yyyy-MM-dd"}
+---
+payload map ({
+	code: upper($.airline ++ $.flightCode ++ formatDate($.departureDate)), 
+	data: $
+})
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[payload]" doc:name="SetFlights" doc:id="c53aae7a-d972-47c8-a7ac-26905f4abbc7" variableName="flights"/>
+		<flow-ref doc:name="Flow Reference" doc:id="507365a8-680c-4eea-ac02-06e173e698c9" name="lab10-transactions"/>
+		<ee:transform doc:name="Transform Message" doc:id="13932cdc-9366-4b73-9158-34bbbac3d133" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+//payload map ({ amount: $.amount as Number, flightID: $.flightID})
+//	orderBy $.amount
+payload groupBy $.flightID
+
+		
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[payload]" doc:name="SetTransactions" doc:id="8dbbc4da-348b-4628-9ea5-6f829537c390" variableName="transactions"/>
+	</flow>
+	<flow name="lab10-transactions" doc:id="f9e2194f-3cfd-4c9a-9335-09a53e1e6f74" >
 		<http:listener doc:name="GET /transactions" doc:id="7d24b6eb-d3b5-4b1b-aa17-92774a4b9986" path="/transactions" config-ref="mua-flights-api-httpListenerConfig"/>
 		<ee:transform doc:name="Transform Message" doc:id="a4901d04-51ed-46b2-9ba7-7b61903b798f" >
 			<ee:message >
@@ -20,7 +55,7 @@ ns ns0 http://training.mulesoft.com/
 {
 	ns0#GetTransactionsforFlights: {
 		flightID: "UNITEDER38SD2015-03-20",
-		flightID: "UNITEDER38SD2015-09-11",
+		flightID: "ER0945",
 		flightID: "UNITEDER38SD2015-02-12"
 	}
 }]]></ee:set-payload>
@@ -32,7 +67,67 @@ ns ns0 http://training.mulesoft.com/
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-payload]]></ee:set-payload>
+payload.body.GetTransactionsforFlightsResponse.*transaction]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="lab10-flights" doc:id="882ed7a4-dc5f-46c4-b7d6-9b35a1fa912e" >
+		<http:listener doc:name="GET /flights" doc:id="94abf2a1-e166-4ce7-b6d5-8529581984fc" config-ref="mua-flights-api-httpListenerConfig" path="/flights"/>
+		<ee:transform doc:name="Transform Message" doc:id="9529c903-a6d2-4847-a98d-56539148c5c5" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+[
+    {
+      "airline": "United",
+      "flightCode": "ER38sd",
+      "fromAirportCode": "LAX",
+      "toAirportCode": "SFO",
+      "departureDate": "May 21, 2016",
+      "emptySeats": 0,
+      "totalSeats": 200,
+      "price": 199,
+      "planeType": "Boeing 737"
+    },
+    {
+      "airline": "Delta",
+      "flightCode": "ER0945",
+      "fromAirportCode": "PDX",
+      "toAirportCode": "CLE",
+      "departureDate": "June 1, 2016",
+      "emptySeats": 24,
+      "totalSeats": 350,
+      "price": 450,
+      "planeType": "Boeing 747"
+    }
+]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="lab10-accounts" doc:id="a0ec44e8-c325-4921-b3f0-562da2662d84" >
+		<http:listener doc:name="GET /accounts" doc:id="7c7f1051-801f-4845-8e1f-e3c86e82e1f1" config-ref="mua-flights-api-httpListenerConfig" path="/accounts"/>
+		<ee:transform doc:name="Transform Message" doc:id="e2d82bff-6adb-42a2-ab38-24ce9f3ffda9" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+["4456", "4968"]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<http:request method="POST" doc:name="Request" doc:id="321f27b7-d5af-4687-b17d-11fe56072a4e" url="http://apdev-accounts-ws.cloudhub.io/api/accountList">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"Requester-ID" : "Value"
+}]]]></http:headers>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="b82756fb-69b9-472c-b66e-496229250db1" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+read(payload, "application/json")]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 	</flow>

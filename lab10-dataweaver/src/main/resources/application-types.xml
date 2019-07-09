@@ -2,22 +2,29 @@
 <types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
   <types:catalog>
     <types:type name="united_flights_json" format="json">
-      <types:shape format="json-schema" location="schemas/united-flights-schema.json"></types:shape>
+      <types:shape format="json-schema" location="schemas/united-flights-schema.json"/>
     </types:type>
     <types:type name="flights_json" format="json">
-      <types:example format="json" location="examples/flights-example.json"></types:example>
+      <types:example format="json" location="examples/flights-example.json"/>
     </types:type>
     <types:type name="american_flights_json" format="json">
-      <types:shape format="json-schema" location="schemas/american-flights-schema.json"></types:shape>
+      <types:shape format="json-schema" location="schemas/american-flights-schema.json"/>
     </types:type>
     <types:type name="Flight_pojo" format="java">
-      <types:shape format="java" element="com.mulesoft.training.Flight"></types:shape>
+      <types:shape format="java" element="com.mulesoft.training.Flight"/>
     </types:type>
     <types:type name="flight_json" format="json">
-      <types:example format="json" location="examples/flight-example.json"></types:example>
+      <types:example format="json" location="examples/flight-example.json"/>
     </types:type>
     <types:type name="flights_xml" format="xml">
-      <types:example format="xml" element="{http://soap.training.mulesoft.com/}listAllFlightsResponse" location="examples/flights-example.xml"></types:example>
+      <types:example format="xml" element="{http://soap.training.mulesoft.com/}listAllFlightsResponse" location="examples/flights-example.xml"/>
+    </types:type>
+    <types:type name="json_transactions_array" format="json">
+      <types:shape format="weave" example="examples/transactions.json"><![CDATA[%dw 2.0
+
+type json_transactions_array = Array<{|  amount: String,   customerRef: String,   flightID: String,   region: String,   transactionID: String|}> {"example": "[{\"amount\":\"735.0\",\"customerRef\":\"4564\",\"flightID\":\"UNITEDER38SD2015-03-20\",\"region\":\"US\",\"transactionID\":\"181948544\"},{\"amount\":\"7536.0\",\"customerRef\":\"4579\",\"flightID\":\"UNITEDER38SD2015-03-20\",\"region\":\"US\",\"transactionID\":\"181948782\"},{\"amount\":\"8603.0\",\"customerRef\":\"4726\",\"flightID\":\"UNITEDER38SD2015-03-20\",\"region\":\"US\",\"transactionID\":\"181948722\"},{\"amount\":\"4610.0\",\"customerRef\":\"4753\",\"flightID\":\"UNITEDER38SD2015-03-20\",\"region\":\"EU\",\"transactionID\":\"181948456\"},{\"amount\":\"1116.0\",\"customerRef\":\"4863\",\"flightID\":\"UNITEDER38SD2015-03-20\",\"region\":\"EU\",\"transactionID\":\"181948592\"},{\"amount\":\"484.0\",\"customerRef\":\"4883\",\"flightID\":\"UNITEDER38SD2015-03-20\",\"region\":\"EU\",\"transactionID\":\"181948445\"},{\"amount\":\"6032.0\",\"customerRef\":\"4968\",\"flightID\":\"UNITEDER38SD2015-03-20\",\"region\":\"US\",\"transactionID\":\"181948717\"}]"}
+
+]]></types:shape>
     </types:type>
   </types:catalog>
   <types:enrichment select="#5adbcebd-1bfb-49d2-b539-c26f09cdddd6">
@@ -79,6 +86,15 @@
       <types:output-event>
         <types:message>
           <types:payload type="flights_xml"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#0e558e38-d106-4f6b-ba36-f71d3c41b37f">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="json_transactions_array"/>
         </types:message>
       </types:output-event>
     </types:processor-declaration>

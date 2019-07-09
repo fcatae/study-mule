@@ -1,0 +1,52 @@
+
+[
+    {
+      "amount": "735.0",
+      "customerRef": "4564",
+      "flightID": "UNITEDER38SD2015-03-20",
+      "region": "US",
+      "transactionID": "181948544"
+    },
+    {
+      "amount": "7536.0",
+      "customerRef": "4579",
+      "flightID": "UNITEDER38SD2015-03-20",
+      "region": "US",
+      "transactionID": "181948782"
+    },
+    {
+      "amount": "8603.0",
+      "customerRef": "4726",
+      "flightID": "UNITEDER38SD2015-03-20",
+      "region": "US",
+      "transactionID": "181948722"
+    },
+    {
+      "amount": "4610.0",
+      "customerRef": "4753",
+      "flightID": "UNITEDER38SD2015-03-20",
+      "region": "EU",
+      "transactionID": "181948456"
+    },
+    {
+      "amount": "1116.0",
+      "customerRef": "4863",
+      "flightID": "UNITEDER38SD2015-03-20",
+      "region": "EU",
+      "transactionID": "181948592"
+    },
+    {
+      "amount": "484.0",
+      "customerRef": "4883",
+      "flightID": "UNITEDER38SD2015-03-20",
+      "region": "EU",
+      "transactionID": "181948445"
+    },
+    {
+      "amount": "6032.0",
+      "customerRef": "4968",
+      "flightID": "UNITEDER38SD2015-03-20",
+      "region": "US",
+      "transactionID": "181948717"
+    }
+  ]

@@ -1,0 +1,26 @@
+[
+    {
+      "creationDate": "2015-04-23T00:00:00",
+      "city": "Polo Lo",
+      "country": "Polonia",
+      "state": "Polo Lo",
+      "miles": 2542,
+      "postal": "49660",
+      "name": "Polo Lo",
+      "accountID": "4456",
+      "accountType": "personal",
+      "street": "411 Polo Lo"
+    },
+    {
+      "creationDate": "2004-12-07T00:00:00",
+      "city": "Charlotte",
+      "country": "USA",
+      "state": "England",
+      "miles": 3232,
+      "postal": "68001",
+      "name": "Nick The Shoemaker",
+      "accountID": "4968",
+      "accountType": "personal",
+      "street": "181 Grunge Lane"
+    }
+  ]
