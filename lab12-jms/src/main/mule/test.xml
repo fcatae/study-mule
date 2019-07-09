@@ -1,21 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
-	xmlns:http="http://www.mulesoft.org/schema/mule/http"
-	xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns:db="http://www.mulesoft.org/schema/mule/db"
-	xmlns:ftp="http://www.mulesoft.org/schema/mule/ftp"
-	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+<mule xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ftp="http://www.mulesoft.org/schema/mule/ftp" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd 
 http://www.mulesoft.org/schema/mule/ftp http://www.mulesoft.org/schema/mule/ftp/current/mule-ftp.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
-http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
 	<jms:config name="JMS_Config" doc:name="JMS Config" doc:id="143e79cc-3de6-4110-ae6f-f52c8a2bda9d" >
 		<jms:active-mq-connection />
 	</jms:config>
 	<flow name="testJMS" doc:id="9f97f6cc-a88b-4ac3-994b-e303a3ae75e2" >
 		<jms:listener doc:name="Listener" doc:id="5035090d-00d1-4839-a7a2-1735fa3ac700" config-ref="JMS_Config" destination="testq"/>
 		<logger level="INFO" doc:name="Logger" doc:id="0672a4ca-fa76-4a93-bf88-8a6a39dbe8c7" />
+	</flow>
+	<flow name="testFlow1" doc:id="211ae3a2-b1c7-4d0d-92a3-beea2a111765" >
+		<vm:listener doc:name="Listener" doc:id="2d3bf4a5-fe38-43a2-899d-95ff375599e0" />
 	</flow>
 	<flow name="testFlow" doc:id="88c2308f-804b-4ede-9726-a99a87e52c8d" >
 		<http:listener doc:name="POST /jms" doc:id="7e893013-2c83-4dfc-9779-73f24c1e09d4" config-ref="HTTP_Listener_config" path="/jms"/>
